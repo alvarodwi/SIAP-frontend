@@ -12,8 +12,8 @@ module.exports = {
 	},
 
 	extends: [
-		'eslint:recommended',
 		'plugin:@typescript-eslint/recommended',
+		'plugin:nuxt/recommended',
 		'plugin:vue/vue3-recommended',
 		'plugin:prettier/recommended',
 	],
@@ -30,4 +30,4 @@ module.exports = {
 			},
 		],
 	},
-};
+}
