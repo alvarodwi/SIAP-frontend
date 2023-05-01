@@ -51,18 +51,32 @@ let errors = ref<LoginError>({ email: undefined, password: undefined })
 
 const api = useApi()
 const adminStore = useAdminStore()
+const store = useGeneralStore()
 
 const login = async () => {
 	const data = {
 		email: email.value || '',
 		password: password.value || '',
 	}
-	const response = await api.admin.login(data)
 
-	adminStore.onLogin('test')
+	const response = await api.admin.login(data)
 
 	console.log(response)
 
-	navigateTo('/admin')
+	if (response.status == 200) {
+		adminStore.onLogin(response.data.access_token)
+		store.addToast({
+			id: nanoid(),
+			type: 'success',
+			message: 'Login successful',
+		})
+		navigateTo('/admin')
+	} else {
+		store.addToast({
+			id: nanoid(),
+			type: 'error',
+			message: response.message,
+		})
+	}
 }
 </script>

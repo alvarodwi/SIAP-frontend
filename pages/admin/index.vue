@@ -7,11 +7,11 @@
 			Silakan cek permintaan akun asisten dibawah ini, pastikan untuk
 			memverifikasi akun yang benar yaa
 		</span>
-		<Table class="mt-6" :items="dummyData" :headers="dummyHeader" has-action>
-			<template #action="{ Nama }">
+		<Table class="mt-6" :items="data" :headers="header" has-action>
+			<template #action="{ id }">
 				<AdminValidationAction
-					@accept="onAccept(Nama)"
-					@reject="onReject(Nama)"
+					@accept="onAccept(id)"
+					@reject="onReject(id)"
 				/>
 			</template>
 		</Table>
@@ -19,19 +19,81 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ middleware: 'admin', layout: 'admin' })
-
-const dummyData = [
-	{ Nama: 'Andyka Baswara', NPM: '140810200061' },
-	{ Nama: 'Alvaro Dwi', NPM: '140810200041' },
-]
-const dummyHeader = ['Nama', 'NPM']
-
-const onAccept = (id: string) => {
-	console.log(id + ' diterima')
+interface ValidationTable {
+	id: string
+	Nama: string
+	NPM: string
 }
 
-const onReject = (id: string) => {
-	console.log(id + ' ditolak')
+definePageMeta({ middleware: 'admin', layout: 'admin' })
+
+const api = useApi()
+const adminStore = useAdminStore()
+const store = useGeneralStore()
+const token = adminStore.token
+
+const data = ref<ValidationTable[]>([])
+const header = ['Nama', 'NPM']
+
+const refresh = async () => {
+	const response = await api.admin.fetchApprovals(token)
+
+	console.log(response)
+
+	if (response.status == 200) {
+		data.value = response.data.data.map((approval) => ({
+			id: approval.id,
+			Nama: approval.user.name,
+			NPM: approval.user.npm,
+		}))
+	} else {
+		store.addToast({
+			id: nanoid(),
+			type: 'error',
+			message: response.message,
+		})
+	}
+}
+
+refresh()
+
+const onAccept = async (id: string) => {
+	console.log('onAccept', id)
+	const acceptResponse = await api.admin.acceptApproval(token, id)
+
+	if (acceptResponse.status == 201) {
+		refresh()
+		store.addToast({
+			id: nanoid(),
+			type: 'success',
+			message: 'Role approved',
+		})
+	} else {
+		store.addToast({
+			id: nanoid(),
+			type: 'error',
+			message: acceptResponse.message,
+		})
+	}
+}
+
+const onReject = async (id: string) => {
+	console.log('onReject', id)
+	const rejectResponse = await api.admin.rejectApproval(token, id)
+
+	if (rejectResponse.status == 201) {
+		refresh()
+		store.addToast({
+			id: nanoid(),
+			type: 'error',
+			message: 'Role rejected',
+		})
+	} else {
+		store.addToast({
+			id: nanoid(),
+			type: 'error',
+			message: rejectResponse.message,
+		})
+	}
 }
 </script>

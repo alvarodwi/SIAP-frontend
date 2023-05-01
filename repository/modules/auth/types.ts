@@ -21,7 +21,3 @@ export interface LoginData {
 	user: User
 	asisten: AsistenPraktikum | null
 }
-
-export interface RegisterData {
-	success: boolean
-}

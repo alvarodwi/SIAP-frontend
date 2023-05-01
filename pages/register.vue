@@ -1,13 +1,13 @@
 <template>
 	<div class="flex flex-col m-auto">
-		<h1 class="mb-8 text-headline-sm mx-auto">Membuat akun baru</h1>
+		<h1 class="mx-auto mb-8 text-headline-sm">Membuat akun baru</h1>
 		<div
 			id="container"
 			class="flex flex-col bg-surface w-60% rounded-2xl border-outline border dark:border-none"
 		>
 			<div
 				id="form"
-				class="w-full grid grid-cols-2 gap-6 rounded-2xl px-9 py-6 justify-center"
+				class="grid justify-center w-full grid-cols-2 gap-6 py-6 rounded-2xl px-9"
 			>
 				<FormInputText
 					v-model:input="email"
@@ -43,7 +43,7 @@
 					"
 				/>
 				<FormInputSelect
-					v-model:input="role"
+					v-model:selected="role"
 					label="Role"
 					:options="[
 						['praktikan', 'Praktikan'],
@@ -52,7 +52,7 @@
 					:error="errors && errors.email ? errors.email : ''"
 				/>
 			</div>
-			<div class="flex flex-col mt-9 w-full">
+			<div class="flex flex-col w-full mt-9">
 				<button
 					type="submit"
 					class="w-full bg-primary text-on-primary text-title-md font-bold py-4 rounded-lg max-w-[440px] mx-auto"
@@ -60,9 +60,9 @@
 				>
 					Daftar
 				</button>
-				<div data-id="text-to-login" class="text-body-md my-9 mx-auto">
+				<div data-id="text-to-login" class="mx-auto text-body-md my-9">
 					<span>Sudah punya akun? </span>
-					<span class="cursor-pointer text-secondary underline">
+					<span class="underline cursor-pointer text-secondary">
 						<NuxtLink to="/login">Masuk</NuxtLink>
 					</span>
 				</div>
@@ -83,15 +83,16 @@ interface RegisterError {
 	role?: string
 }
 
-let email = ref(null)
-let password = ref(null)
-let confirmPassword = ref(null)
-let namaLengkap = ref(null)
-let npm = ref(null)
-let role = ref(null)
+let email = ref('')
+let password = ref('')
+let confirmPassword = ref('')
+let namaLengkap = ref('')
+let npm = ref('')
+let role = ref('')
 let errors = ref<RegisterError>({ email: undefined, password: undefined })
 
 const api = useApi()
+const store = useGeneralStore()
 
 const register = async () => {
 	const data = {
@@ -107,6 +108,19 @@ const register = async () => {
 
 	console.log(response)
 
-	navigateTo('/login')
+	if (response.status == 201) {
+		store.addToast({
+			id: nanoid(),
+			type: 'success',
+			message: 'Registered succesfully',
+		})
+		navigateTo('/login')
+	} else {
+		store.addToast({
+			id: nanoid(),
+			type: 'error',
+			message: response.message,
+		})
+	}
 }
 </script>

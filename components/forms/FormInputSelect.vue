@@ -10,14 +10,13 @@
 			<option
 				v-for="option in options"
 				:key="option[0]"
-				class=""
 				:value="option[0]"
 				@click="selected = option[0]"
 			>
 				{{ option[1] }}
 			</option>
 		</select>
-		<span v-if="error" class="text-error text-body-md mt-2">
+		<span v-if="error" class="mt-2 text-error text-body-md">
 			{{ error }}
 		</span>
 	</div>
