@@ -1,7 +1,7 @@
 <template>
 	<div class="flex flex-col m-auto">
-		<h1 class="text-display-md font-bold mx-auto">Admin SIAP</h1>
-		<span class="mb-16 text-headline-md mx-auto">
+		<h1 class="mx-auto font-bold text-display-md">Admin SIAP</h1>
+		<span class="mx-auto mb-16 text-headline-md">
 			Sistem Informasi Asisten Praktikum
 		</span>
 		<div
@@ -38,6 +38,8 @@
 </template>
 
 <script setup lang="ts">
+definePageMeta({ layout: 'auth' })
+
 interface LoginError {
 	email?: string
 	password?: string
@@ -48,6 +50,7 @@ let password = ref(null)
 let errors = ref<LoginError>({ email: undefined, password: undefined })
 
 const api = useApi()
+const adminStore = useAdminStore()
 
 const login = async () => {
 	const data = {
@@ -55,6 +58,8 @@ const login = async () => {
 		password: password.value || '',
 	}
 	const response = await api.admin.login(data)
+
+	adminStore.onLogin('test')
 
 	console.log(response)
 

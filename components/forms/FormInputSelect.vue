@@ -32,7 +32,7 @@ interface Props {
 }
 
 const props = defineProps<Props>()
-const { label, selected, error } = toRefs(props)
+const { label, selected, options, error } = toRefs(props)
 
 const emit = defineEmits(['update:selected'])
 

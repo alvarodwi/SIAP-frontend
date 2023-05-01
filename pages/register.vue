@@ -72,6 +72,8 @@
 </template>
 
 <script setup lang="ts">
+definePageMeta({ layout: 'auth' })
+
 interface RegisterError {
 	email?: string
 	password?: string

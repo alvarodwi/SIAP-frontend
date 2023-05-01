@@ -2,31 +2,23 @@
 	<main
 		class="inset-0 w-screen min-h-screen dark bg-background bg-opacity-95 scroll-smooth"
 	>
-		<TopAppBar :username="username()" @on-logout="logout" />
+		<TopAppBar hide-sidebar username="Admin" @on-logout="logout" />
 		<ToastWrapper />
 		<slot />
 	</main>
 </template>
 
 <script setup lang="ts">
-const authStore = useAuthStore()
+const adminStore = useAdminStore()
 const store = useGeneralStore()
 
-const username = () => {
-	if (authStore.user) {
-		return authStore.user.name.split(' ').slice(0, 2).join(' ')
-	} else {
-		return ''
-	}
-}
-
 const logout = () => {
-	authStore.onLogout()
+	adminStore.onLogout()
 	store.addToast({
 		id: nanoid(),
 		type: 'success',
 		message: 'You have logged out',
 	})
-	navigateTo('/login')
+	navigateTo('/admin/login')
 }
 </script>

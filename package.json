@@ -35,8 +35,8 @@
 	},
 	"dependencies": {
 		"@pinia/nuxt": "^0.4.8",
-		"axios": "^1.4.0",
 		"clsx": "^1.2.1",
+		"nanoid": "^4.0.2",
 		"pinia": "^2.0.34",
 		"tailwind-merge": "^1.12.0"
 	}

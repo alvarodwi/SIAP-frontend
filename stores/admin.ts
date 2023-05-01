@@ -23,9 +23,6 @@ export const useAdminStore = defineStore({
 		setApprovals(approvals: RoleApproval[]) {
 			this.$state.approvals = approvals
 		},
-		getToken() {
-			return this.$state.token
-		},
 	},
 	persist: true,
 })

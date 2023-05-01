@@ -26,9 +26,6 @@ export const useAuthStore = defineStore({
 			this.$state.token = ''
 			this.$state.isAsisten = false
 		},
-		getToken() {
-			return this.$state.token
-		},
 	},
 	persist: true,
 })
