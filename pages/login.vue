@@ -57,8 +57,8 @@ let email = ref('')
 let password = ref('')
 let errors = ref<LoginError>({ email: undefined, password: undefined })
 
-const authStore = useAuthStore()
-const store = useGeneralStore()
+const { onLogin } = useAuthStore()
+const { addToast } = useGeneralStore()
 const api = useApi()
 
 const login = async () => {
@@ -70,20 +70,20 @@ const login = async () => {
 
 	console.log(response)
 
-	if (response.status == 200) {
-		authStore.onLogin(
+	if (response.status >= 200 && response.status <= 299) {
+		onLogin(
 			response.data.user,
 			response.data.access_token,
 			response.data.asisten != undefined
 		)
-		store.addToast({
+		addToast({
 			id: nanoid(),
 			type: 'success',
 			message: 'Login success',
 		})
 		navigateTo('/')
 	} else {
-		store.addToast({
+		addToast({
 			id: nanoid(),
 			type: 'error',
 			message: response.message,

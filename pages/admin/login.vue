@@ -50,8 +50,8 @@ let password = ref(null)
 let errors = ref<LoginError>({ email: undefined, password: undefined })
 
 const api = useApi()
-const adminStore = useAdminStore()
-const store = useGeneralStore()
+const { onLogin } = useAdminStore()
+const { addToast } = useGeneralStore()
 
 const login = async () => {
 	const data = {
@@ -63,16 +63,16 @@ const login = async () => {
 
 	console.log(response)
 
-	if (response.status == 200) {
-		adminStore.onLogin(response.data.access_token)
-		store.addToast({
+	if (response.status >= 200 && response.status <= 299) {
+		onLogin(response.data.access_token)
+		addToast({
 			id: nanoid(),
 			type: 'success',
 			message: 'Login successful',
 		})
 		navigateTo('/admin')
 	} else {
-		store.addToast({
+		addToast({
 			id: nanoid(),
 			type: 'error',
 			message: response.message,

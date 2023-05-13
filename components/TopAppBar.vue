@@ -28,8 +28,8 @@
 
 <script setup lang="ts">
 interface Props {
-	hideSidebar: boolean
 	username: string
+	hideSidebar?: boolean
 }
 const props = defineProps<Props>()
 const { hideSidebar } = toRefs(props)

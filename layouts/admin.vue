@@ -9,12 +9,12 @@
 </template>
 
 <script setup lang="ts">
-const adminStore = useAdminStore()
-const store = useGeneralStore()
+const { onLogout } = useAdminStore()
+const { addToast } = useGeneralStore()
 
 const logout = () => {
-	adminStore.onLogout()
-	store.addToast({
+	onLogout()
+	addToast({
 		id: nanoid(),
 		type: 'success',
 		message: 'You have logged out',

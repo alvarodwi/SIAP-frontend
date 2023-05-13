@@ -8,8 +8,9 @@
 			memverifikasi akun yang benar yaa
 		</span>
 		<Table class="mt-6" :items="data" :headers="header" has-action>
-			<template #action="{ id }">
+			<template #action="{ id, status }">
 				<AdminValidationAction
+					:status="status"
 					@accept="onAccept(id)"
 					@reject="onReject(id)"
 				/>
@@ -23,14 +24,14 @@ interface ValidationTable {
 	id: string
 	Nama: string
 	NPM: string
+	status: 'Accepted' | 'Pending' | 'Rejected'
 }
 
 definePageMeta({ middleware: 'admin', layout: 'admin' })
 
 const api = useApi()
-const adminStore = useAdminStore()
-const store = useGeneralStore()
-const token = adminStore.token
+const { addToast } = useGeneralStore()
+const { token } = useAdminStore()
 
 const data = ref<ValidationTable[]>([])
 const header = ['Nama', 'NPM']
@@ -40,14 +41,15 @@ const refresh = async () => {
 
 	console.log(response)
 
-	if (response.status == 200) {
+	if (response.status >= 200 && response.status <= 299) {
 		data.value = response.data.data.map((approval) => ({
 			id: approval.id,
 			Nama: approval.user.name,
 			NPM: approval.user.npm,
+			status: approval.status,
 		}))
 	} else {
-		store.addToast({
+		addToast({
 			id: nanoid(),
 			type: 'error',
 			message: response.message,
@@ -58,18 +60,17 @@ const refresh = async () => {
 refresh()
 
 const onAccept = async (id: string) => {
-	console.log('onAccept', id)
 	const acceptResponse = await api.admin.acceptApproval(token, id)
 
 	if (acceptResponse.status == 201) {
 		refresh()
-		store.addToast({
+		addToast({
 			id: nanoid(),
 			type: 'success',
 			message: 'Role approved',
 		})
 	} else {
-		store.addToast({
+		addToast({
 			id: nanoid(),
 			type: 'error',
 			message: acceptResponse.message,
@@ -78,18 +79,17 @@ const onAccept = async (id: string) => {
 }
 
 const onReject = async (id: string) => {
-	console.log('onReject', id)
 	const rejectResponse = await api.admin.rejectApproval(token, id)
 
 	if (rejectResponse.status == 201) {
 		refresh()
-		store.addToast({
+		addToast({
 			id: nanoid(),
 			type: 'error',
 			message: 'Role rejected',
 		})
 	} else {
-		store.addToast({
+		addToast({
 			id: nanoid(),
 			type: 'error',
 			message: rejectResponse.message,

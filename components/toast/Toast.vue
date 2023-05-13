@@ -1,6 +1,6 @@
 <template>
 	<div
-		class="flex flex-row px-4 py-2 mx-2 my-2 transition-opacity duration-1000 ease-out rounded-lg max-w-ws"
+		class="flex flex-row px-4 py-2 mx-2 my-2 transition-all duration-500 rounded-lg max-w-ws"
 		:class="data.type == 'success' ? 'bg-primary' : 'bg-error'"
 	>
 		<Icon

@@ -1,10 +1,12 @@
 import { $fetch, FetchOptions } from 'ofetch'
 import AdminModule from '~/repository/modules/admin'
 import AuthModule from '~/repository/modules/auth'
+import KelasModule from '~/repository/modules/kelas/index '
 
 interface ApiInstance {
 	auth: AuthModule
 	admin: AdminModule
+	kelas: KelasModule
 }
 
 export default function () {
@@ -19,6 +21,7 @@ export default function () {
 	const modules: ApiInstance = {
 		auth: new AuthModule(apiFetcher),
 		admin: new AdminModule(apiFetcher),
+		kelas: new KelasModule(apiFetcher),
 	}
 
 	return modules

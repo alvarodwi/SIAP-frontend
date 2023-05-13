@@ -49,7 +49,7 @@
 						['praktikan', 'Praktikan'],
 						['asisten', 'Asisten Praktikum'],
 					]"
-					:error="errors && errors.email ? errors.email : ''"
+					:error="errors && errors.role ? errors.role : ''"
 				/>
 			</div>
 			<div class="flex flex-col w-full mt-9">
@@ -92,7 +92,7 @@ let role = ref('')
 let errors = ref<RegisterError>({ email: undefined, password: undefined })
 
 const api = useApi()
-const store = useGeneralStore()
+const { addToast } = useGeneralStore()
 
 const register = async () => {
 	const data = {
@@ -109,14 +109,14 @@ const register = async () => {
 	console.log(response)
 
 	if (response.status == 201) {
-		store.addToast({
+		addToast({
 			id: nanoid(),
 			type: 'success',
 			message: 'Registered succesfully',
 		})
 		navigateTo('/login')
 	} else {
-		store.addToast({
+		addToast({
 			id: nanoid(),
 			type: 'error',
 			message: response.message,
