@@ -13,7 +13,7 @@ export default function () {
 	const nuxtApp = useNuxtApp()
 
 	const fetchOptions: FetchOptions = {
-		baseURL: nuxtApp.$config.API_BASE_URL || 'http://localhost:3002',
+		baseURL: nuxtApp.$config.public.API_BASE_URL,
 	}
 
 	const apiFetcher = $fetch.create(fetchOptions)

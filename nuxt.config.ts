@@ -20,6 +20,11 @@ export default defineNuxtConfig({
 		// eslint
 		'@nuxtjs/eslint-module',
 	],
+	runtimeConfig: {
+		public: {
+			API_BASE_URL: process.env.API_BASE_URL,
+		},
+	},
 	build: {
 		transpile: ['@vuepic/vue-datepicker', '@headlessui/vue'],
 	},
