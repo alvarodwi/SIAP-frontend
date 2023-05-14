@@ -15,13 +15,12 @@ export default defineNuxtConfig({
 		'@pinia-plugin-persistedstate/nuxt',
 		// tailwind
 		'@nuxtjs/tailwindcss',
-		'nuxt-headlessui',
 		// icons
 		'nuxt-icon',
 		// eslint
 		'@nuxtjs/eslint-module',
 	],
 	build: {
-		transpile: ['@vuepic/vue-datepicker'],
+		transpile: ['@vuepic/vue-datepicker', '@headlessui/vue'],
 	},
 })

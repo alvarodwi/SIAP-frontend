@@ -45,7 +45,7 @@
 					kelas.asistenKelas?.map((a) => a.asisten?.user?.name).sort() ??
 					[]
 				"
-				@click="updateSelectedClass(kelas)"
+				@item-click="updateSelectedClass(kelas)"
 			>
 				<hr
 					v-if="i != joinedClass.length - 1"
@@ -69,7 +69,7 @@
 					kelas.asistenKelas?.map((a) => a.asisten?.user?.name).sort() ??
 					[]
 				"
-				@click="updateSelectedClass(kelas)"
+				@item-click="updateSelectedClass(kelas)"
 			>
 				<hr
 					v-if="i != ownedClass.length - 1"

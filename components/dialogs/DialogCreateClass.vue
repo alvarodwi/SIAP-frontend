@@ -29,12 +29,9 @@
 			placeholder="Tulis deskripsi kelas disini"
 		/>
 		<FormInputSelect
-			v-model:selected="formData.listAsisten"
+			v-model="formData.listAsisten"
 			label="Pengampu Lainnya"
-			:options="[
-				['rihlan', 'Rihlan Lumenda'],
-				['acid', 'Rafiansyah Rasyid'],
-			]"
+			:options="listAsprak"
 			class="mt-6"
 		/>
 		<button
@@ -49,12 +46,24 @@
 
 <script setup lang="ts">
 import { BuatKelas } from '~/models/forms/BuatKelas'
+import { DropdownItem } from '~/models/state/DropdownItem'
 
 const formData: BuatKelas = reactive({
 	judul: '',
 	deskripsi: '',
 	listAsisten: [],
 })
+
+const listAsprak: DropdownItem[] = [
+	{
+		name: 'Rihlan Lumenda',
+		value: 'rihlan13',
+	},
+	{
+		name: 'Rafiansyah Rasyid',
+		value: 'acid49',
+	},
+]
 
 defineEmits(['submit', 'close'])
 </script>

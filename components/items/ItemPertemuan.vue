@@ -10,6 +10,7 @@
 			<button
 				class="px-4 font-bold border rounded-lg text-title-sm interactive-bg-surface border-primary"
 				type="button"
+				@click="$emit('formIzinClick', 1)"
 			>
 				Isi Form Ketidakhadiran
 			</button>
@@ -48,7 +49,5 @@ interface Props {
 const props = defineProps<Props>()
 const { data } = toRefs(props)
 
-onMounted(() => {
-	console.log(data)
-})
+defineEmits(['formIzinClick'])
 </script>

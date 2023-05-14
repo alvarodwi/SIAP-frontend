@@ -3,3 +3,4 @@ export type DialogType =
 	| 'join-class'
 	| 'create-pertemuan'
 	| 'create-pengumuman'
+	| 'form-izin'

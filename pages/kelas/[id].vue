@@ -60,7 +60,11 @@
 
 		<!-- list pertemuan -->
 		<div v-if="state.filter == 'pertemuan'" class="flex flex-col mt-5">
-			<ItemPertemuan v-for="i in 5" :key="i">
+			<ItemPertemuan
+				v-for="i in 5"
+				:key="i"
+				@form-izin-click="onFormIzinClick"
+			>
 				<hr v-if="i != 5" class="h-1 mt-4 text-outline" />
 			</ItemPertemuan>
 		</div>
@@ -96,12 +100,20 @@
 				@submit="onSubmitCreatePengumuman"
 				@close="hideDialog()"
 			/>
+			<DialogFormIzin
+				v-if="showDialog == 'form-izin'"
+				:index="state.selectedPertemuanIndex"
+				:nama-kelas="selectedClass?.judul ?? 'ini'"
+				@submit="onSubmitFormIzin"
+				@close="hideDialog()"
+			/>
 		</BaseDialog>
 	</div>
 </template>
 
 <script setup lang="ts">
 import { Kelas } from '~/models/Kelas'
+import { BuatIzin } from '~/models/forms/BuatIzin'
 import { BuatKelas } from '~/models/forms/BuatKelas'
 import { BuatPengumuman } from '~/models/forms/BuatPengumuman'
 import { BuatPertemuan } from '~/models/forms/BuatPertemuan'
@@ -122,9 +134,11 @@ useHead({
 
 interface State {
 	filter: 'pertemuan' | 'pengumuman'
+	selectedPertemuanIndex: number
 }
 const state = reactive<State>({
 	filter: 'pertemuan',
+	selectedPertemuanIndex: 0,
 })
 
 const toggleFilter = () => {
@@ -183,11 +197,11 @@ const onRefreshClass = async () => {
 
 	if (response.status >= 200 && response.status <= 299) {
 		const newClasses: Kelas[] = [
-			...response.data.kelas.map((kelas: Kelas[]) => ({
+			...response.data.kelas.map((kelas: Kelas) => ({
 				...kelas,
 				owned: false,
 			})),
-			...response.data.owned.map((kelas: Kelas[]) => ({
+			...response.data.owned.map((kelas: Kelas) => ({
 				...kelas,
 				owned: true,
 			})),
@@ -200,6 +214,11 @@ const onRefreshClass = async () => {
 			message: response.message,
 		})
 	}
+}
+
+const onFormIzinClick = (index: number) => {
+	state.selectedPertemuanIndex = index
+	toggleDialog('form-izin')
 }
 
 const onSubmitCreateClass = async (data: BuatKelas) => {
@@ -258,6 +277,11 @@ const onSubmitCreatePengumuman = (data: BuatPengumuman) => {
 }
 
 const onSubmitCreatePertemuan = (data: BuatPertemuan) => {
+	hideDialog()
+	console.log(data)
+}
+
+const onSubmitFormIzin = (data: BuatIzin) => {
 	hideDialog()
 	console.log(data)
 }

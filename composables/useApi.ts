@@ -1,7 +1,7 @@
 import { $fetch, FetchOptions } from 'ofetch'
 import AdminModule from '~/repository/modules/admin'
 import AuthModule from '~/repository/modules/auth'
-import KelasModule from '~/repository/modules/kelas/index '
+import KelasModule from '~/repository/modules/kelas'
 
 interface ApiInstance {
 	auth: AuthModule
