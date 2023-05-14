@@ -1,22 +1,61 @@
 <template>
 	<main
-		class="dark bg-background bg-opacity-95 inset-0 min-h-screen w-screen scroll-smooth flex flex-col"
+		class="inset-0 w-screen min-h-screen dark bg-background bg-opacity-95 scroll-smooth"
 	>
-		<div v-if="loading" class="m-auto">
-			<LoadingIndicator />
-		</div>
-		<slot v-else />
+		<TopAppBar
+			:username="username()"
+			@on-logout="logout"
+			@open-sidebar="state.isSidebarOpen = true"
+		/>
+		<ToastWrapper />
+		<Sidebar
+			:class="state.isSidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+			class="top-0 absolute w-[24%] transition-all duration-500 transform"
+			@hide-sidebar="state.isSidebarOpen = false"
+			@create-class="
+				() => {
+					toggleDialog('create-class')
+					state.isSidebarOpen = false
+				}
+			"
+			@join-class="
+				() => {
+					toggleDialog('join-class')
+					state.isSidebarOpen = false
+				}
+			"
+		/>
+		<slot />
 	</main>
 </template>
 
 <script setup lang="ts">
-const nuxtApp = useNuxtApp()
-const loading = ref(false)
+const { user, onLogout } = useAuthStore()
+const { addToast, toggleDialog } = useGeneralStore()
 
-nuxtApp.hook('page:start', () => {
-	loading.value = true
+const username = () => {
+	if (user) {
+		return user.name.split(' ').slice(0, 2).join(' ')
+	} else {
+		return ''
+	}
+}
+
+interface State {
+	isSidebarOpen: boolean
+}
+
+const state = reactive<State>({
+	isSidebarOpen: false,
 })
-nuxtApp.hook('page:finish', () => {
-	loading.value = false
-})
+
+const logout = () => {
+	onLogout()
+	addToast({
+		id: nanoid(),
+		type: 'success',
+		message: 'You have logged out',
+	})
+	navigateTo('/login')
+}
 </script>

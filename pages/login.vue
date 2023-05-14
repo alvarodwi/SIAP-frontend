@@ -4,7 +4,7 @@
 		class="flex flex-row bg-tertiary h-[414px] w-60% m-auto rounded-2xl border-outline border dark:border-none"
 	>
 		<div id="label" class="w-40% flex flex-col px-16 my-auto">
-			<h1 class="text-display-md font-bold">SIAP</h1>
+			<h1 class="font-bold text-display-md">SIAP</h1>
 			<span class="text-headline-md">Sistem Informasi</span>
 			<span class="text-headline-md">Aktivitas Praktikum</span>
 		</div>
@@ -30,14 +30,14 @@
 			</div>
 			<button
 				type="submit"
-				class="w-full bg-primary text-on-primary text-title-md font-bold py-4 rounded-lg mt-9"
+				class="w-full py-4 font-bold rounded-lg bg-primary text-on-primary text-title-md mt-9"
 				@click="login"
 			>
 				Masuk
 			</button>
 			<div data-id="text-to-register" class="text-body-md mt-9">
 				<span>Belum punya akun? </span>
-				<span class="cursor-pointer text-secondary underline">
+				<span class="underline cursor-pointer text-secondary">
 					<NuxtLink to="/register">Daftar sekarang</NuxtLink>
 				</span>
 			</div>
@@ -46,16 +46,19 @@
 </template>
 
 <script setup lang="ts">
+definePageMeta({ layout: 'auth' })
+
 interface LoginError {
 	email?: string
 	password?: string
 }
 
-let email = ref(null)
-let password = ref(null)
+let email = ref('')
+let password = ref('')
 let errors = ref<LoginError>({ email: undefined, password: undefined })
 
-const authStore = useAuthStore()
+const { onLogin } = useAuthStore()
+const { addToast } = useGeneralStore()
 const api = useApi()
 
 const login = async () => {
@@ -67,7 +70,24 @@ const login = async () => {
 
 	console.log(response)
 
-	authStore.onLogin(response.data.user, 'test', false)
-	navigateTo('/')
+	if (response.status >= 200 && response.status <= 299) {
+		onLogin(
+			response.data.user,
+			response.data.access_token,
+			response.data.asisten != undefined
+		)
+		addToast({
+			id: nanoid(),
+			type: 'success',
+			message: 'Login success',
+		})
+		navigateTo('/')
+	} else {
+		addToast({
+			id: nanoid(),
+			type: 'error',
+			message: response.message,
+		})
+	}
 }
 </script>

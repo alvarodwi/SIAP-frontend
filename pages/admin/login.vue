@@ -1,7 +1,7 @@
 <template>
 	<div class="flex flex-col m-auto">
-		<h1 class="text-display-md font-bold mx-auto">Admin SIAP</h1>
-		<span class="mb-16 text-headline-md mx-auto">
+		<h1 class="mx-auto font-bold text-display-md">Admin SIAP</h1>
+		<span class="mx-auto mb-16 text-headline-md">
 			Sistem Informasi Asisten Praktikum
 		</span>
 		<div
@@ -38,6 +38,8 @@
 </template>
 
 <script setup lang="ts">
+definePageMeta({ layout: 'auth' })
+
 interface LoginError {
 	email?: string
 	password?: string
@@ -48,16 +50,33 @@ let password = ref(null)
 let errors = ref<LoginError>({ email: undefined, password: undefined })
 
 const api = useApi()
+const { onLogin } = useAdminStore()
+const { addToast } = useGeneralStore()
 
 const login = async () => {
 	const data = {
 		email: email.value || '',
 		password: password.value || '',
 	}
+
 	const response = await api.admin.login(data)
 
 	console.log(response)
 
-	navigateTo('/admin')
+	if (response.status >= 200 && response.status <= 299) {
+		onLogin(response.data.access_token)
+		addToast({
+			id: nanoid(),
+			type: 'success',
+			message: 'Login successful',
+		})
+		navigateTo('/admin')
+	} else {
+		addToast({
+			id: nanoid(),
+			type: 'error',
+			message: response.message,
+		})
+	}
 }
 </script>
