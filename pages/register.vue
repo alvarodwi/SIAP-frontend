@@ -43,12 +43,9 @@
 					"
 				/>
 				<FormInputSelect
-					v-model:selected="role"
+					v-model="role"
 					label="Role"
-					:options="[
-						['praktikan', 'Praktikan'],
-						['asisten', 'Asisten Praktikum'],
-					]"
+					:options="listRole"
 					:error="errors && errors.role ? errors.role : ''"
 				/>
 			</div>
@@ -72,6 +69,8 @@
 </template>
 
 <script setup lang="ts">
+import { DropdownItem } from '~/models/state/DropdownItem'
+
 definePageMeta({ layout: 'auth' })
 
 interface RegisterError {
@@ -90,6 +89,17 @@ let namaLengkap = ref('')
 let npm = ref('')
 let role = ref('')
 let errors = ref<RegisterError>({ email: undefined, password: undefined })
+
+const listRole: DropdownItem[] = [
+	{
+		name: 'Praktikan',
+		value: 'praktikan',
+	},
+	{
+		name: 'Asisten Praktikum',
+		value: 'asisten',
+	},
+]
 
 const api = useApi()
 const { addToast } = useGeneralStore()
