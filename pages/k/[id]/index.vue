@@ -11,9 +11,18 @@
 		<div data-id="header" class="flex flex-col w-fit min-w-[40%]">
 			<div class="flex flex-row items-center mt-6">
 				<div class="flex flex-col">
-					<h1 class="text-headline-md">Hi, {{ username() }} 👋</h1>
+					<h1 class="text-headline-md">{{ selectedClass?.judul }}</h1>
 					<span class="text-title-md">
-						Semangat terus praktikumnya yaa!
+						{{
+							(
+								selectedClass?.asistenKelas
+									?.map((a) => a.asisten?.user?.name)
+									.sort() ?? []
+							).join(',')
+						}}
+					</span>
+					<span class="text-title-sm mt-2">
+						Kode Kelas : {{ selectedClass?.kode }}
 					</span>
 				</div>
 				<div class="flex flex-row grow justify-end ml-9">
@@ -148,8 +157,14 @@ import { PertemuanByKelasData } from '~/repository/modules/pertemuan/types'
 
 definePageMeta({ middleware: 'auth' })
 
-const { addToast, toggleDialog, hideDialog, refreshClass } = useGeneralStore()
-const { user, token } = useAuthStore()
+const {
+	addToast,
+	toggleDialog,
+	hideDialog,
+	refreshClass,
+	updateSelectedClass,
+} = useGeneralStore()
+const { token } = useAuthStore()
 const { selectedClass, showDialog } = toRefs(useGeneralStore())
 const api = useApi()
 const route = useRoute()
@@ -180,14 +195,6 @@ const toggleFilter = () => {
 	}
 }
 
-const username = () => {
-	if (user) {
-		return user.name.split(' ').slice(0, 2).join(' ')
-	} else {
-		return ''
-	}
-}
-
 const crumbs = computed<BreadcrumbData[]>(() => [
 	{
 		name: 'Dashboard',
@@ -211,6 +218,7 @@ const fabActions: FabAction[] = [
 
 onMounted(async () => {
 	onRefreshClass()
+	onRefreshCurrentClass()
 	onRefreshPertemuan()
 	onRefreshBroadcast()
 })
@@ -261,6 +269,23 @@ const onRefreshClass = async () => {
 			)
 		}
 		refreshClass(newClasses)
+	} else {
+		addToast({
+			id: nanoid(),
+			type: 'error',
+			message: response.message,
+		})
+	}
+}
+
+const onRefreshCurrentClass = async () => {
+	const response = await api.kelas.fetchKelasById(token, idKelas)
+
+	if (response.status >= 200 && response.status <= 299) {
+		updateSelectedClass({
+			...response.data.kelas,
+			owned: response.data.isAsisten,
+		})
 	} else {
 		addToast({
 			id: nanoid(),

@@ -15,3 +15,8 @@ export interface CreateKelasBody {
 export interface JoinKelasBody {
 	kode: string
 }
+
+export interface KelasByIdData {
+	kelas: Kelas
+	isAsisten: boolean
+}

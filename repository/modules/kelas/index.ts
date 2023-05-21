@@ -1,10 +1,26 @@
 import HttpFactory from '~/repository/factory'
 import { ApiResponse, StatusData } from '~/repository/types'
-import { AllKelasData, CreateKelasBody, JoinKelasBody } from './types'
+import {
+	AllKelasData,
+	CreateKelasBody,
+	JoinKelasBody,
+	KelasByIdData,
+} from './types'
 
 class KelasModule extends HttpFactory {
 	async fetchAllKelas(token: string): Promise<ApiResponse<AllKelasData>> {
 		return await this.call('GET', '/kelas', undefined, {
+			headers: {
+				Authorization: `Bearer ${token}`,
+			},
+		})
+	}
+
+	async fetchKelasById(
+		token: string,
+		idKelas: string
+	): Promise<ApiResponse<KelasByIdData>> {
+		return await this.call('GET', `kelas/${idKelas}`, undefined, {
 			headers: {
 				Authorization: `Bearer ${token}`,
 			},
