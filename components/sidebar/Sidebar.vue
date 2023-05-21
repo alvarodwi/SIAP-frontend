@@ -2,7 +2,8 @@
 	<div class="flex w-full" @click="$emit('hideSidebar')">
 		<div
 			data-id="sidebar"
-			class="flex flex-col w-1/4 h-screen p-6 bg-surface"
+			class="flex flex-col w-1/4 h-screen p-6 bg-surface z-50"
+			@click.stop
 		>
 			<div
 				class="rounded-full interactive-bg-surface w-fit"
@@ -10,31 +11,46 @@
 			>
 				<Icon name="tabler:chevrons-left" class="w-9 h-9" />
 			</div>
-			<NuxtLink to="/" class="my-8 cursor-pointer hover:text-primary-hover">
+			<NuxtLink
+				to="/"
+				class="my-4 cursor-pointer hover:text-primary-hover"
+				@click="$emit('hideSidebar')"
+			>
 				<span class="text-title-lg">Home</span></NuxtLink
 			>
+			<div
+				v-if="joinedClass.length > 0 || ownedClass.length > 0"
+				class="w-full h-[1px] bg-outline my-2"
+			></div>
 			<div class="flex flex-col overflow-y-auto">
-				<span class="mb-4 text-title-small">Kelas yang diikuti</span>
-				<SidebarItem
-					v-for="kelas in joinedClass"
-					:key="kelas"
-					:is-active="kelas.id == selectedClass?.id"
-					:label="kelas.judul"
-					:url="`/kelas/${kelas.id}`"
-					@click="updateSelectedClass(kelas)"
-				/>
-				<span class="mt-4 mb-4 text-title-small">Kelas yang diampu</span>
-				<SidebarItem
-					v-for="kelas in ownedClass"
-					:key="kelas"
-					:is-active="kelas.id == selectedClass?.id"
-					:label="kelas.judul"
-					:url="`/kelas/${kelas.id}`"
-					@click="updateSelectedClass(kelas)"
-				/>
+				<div v-if="joinedClass.length > 0" class="flex flex-col">
+					<span class="mt-4 mb-4 text-title-small"
+						>Kelas yang diikuti</span
+					>
+					<SidebarItem
+						v-for="kelas in joinedClass"
+						:key="kelas"
+						:is-active="kelas.id == selectedClass?.id"
+						:label="kelas.judul"
+						:url="`/k/${kelas.id}`"
+						@click="onSidebarClicked(kelas)"
+					/>
+				</div>
+				<div v-if="ownedClass.length > 0" class="flex flex-col">
+					<span class="mt-4 mb-4 text-title-small">Kelas yang diampu</span>
+					<SidebarItem
+						v-for="kelas in ownedClass"
+						:key="kelas"
+						:is-active="kelas.id == selectedClass?.id"
+						:label="kelas.judul"
+						:url="`/k/${kelas.id}`"
+						@click="onSidebarClicked(kelas)"
+					/>
+				</div>
 			</div>
 			<div class="flex flex-col mt-8">
 				<button
+					v-if="isAsisten"
 					class="w-full py-4 font-bold rounded-lg interactive-bg-primary text-title-md"
 					@click="$emit('createClass')"
 				>
@@ -53,9 +69,13 @@
 
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
+import { Kelas } from '~/models/Kelas'
 
+const { isAsisten } = useAuthStore()
 const { updateSelectedClass } = useGeneralStore()
 const { selectedClass, classes } = storeToRefs(useGeneralStore())
+
+const emit = defineEmits(['hideSidebar', 'joinClass', 'createClass'])
 
 const joinedClass = computed(() => {
 	return classes.value.filter((k) => !k.owned)
@@ -65,7 +85,10 @@ const ownedClass = computed(() => {
 	return classes.value.filter((k) => k.owned)
 })
 
-defineEmits(['hideSidebar', 'joinClass', 'createClass'])
+const onSidebarClicked = (kelas: Kelas) => {
+	updateSelectedClass(kelas)
+	emit('hideSidebar')
+}
 </script>
 
 <style>

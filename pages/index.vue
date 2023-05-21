@@ -2,7 +2,7 @@
 	<div class="p-6">
 		<Breadcrumb :crumbs="crumbs" />
 		<!-- header -->
-		<div data-id="header" class="flex flex-col w-fit">
+		<div data-id="header" class="flex flex-col w-fit min-w-[30%]">
 			<div class="flex flex-row items-center mt-6">
 				<div class="flex flex-col">
 					<h1 class="text-headline-md">Hi, {{ username() }} 👋</h1>
@@ -10,8 +10,9 @@
 						>Semangat terus praktikumnya yaa!</span
 					>
 				</div>
-				<div class="ml-9">
+				<div class="flex flex-row ml-9 grow items-end justify-end">
 					<button
+						v-if="isAsisten"
 						type="button"
 						class="px-4 py-3 mr-6 font-bold rounded-lg interactive-bg-primary text-title-sm"
 						@click="toggleDialog('create-class')"
@@ -29,53 +30,60 @@
 			</div>
 			<hr class="h-1 mt-6 text-outline" />
 		</div>
-		<!-- kelas -->
-		<h2 class="mt-6 text-label-lg">Kelas yang diikuti</h2>
-		<div
-			v-if="joinedClass.length > 0"
-			data-id="joined-classes"
-			class="p-2 mt-6 rounded-lg bg-surface"
-		>
-			<ItemKelas
-				v-for="(kelas, i) in joinedClass"
-				:key="i"
-				:title="kelas.judul"
-				:item-id="kelas.id"
-				:owner-names="
-					kelas.asistenKelas?.map((a) => a.asisten?.user?.name).sort() ??
-					[]
-				"
-				@item-click="updateSelectedClass(kelas)"
-			>
-				<hr
-					v-if="i != joinedClass.length - 1"
-					class="h-1 mx-4 my-2 text-outline"
-				/>
-			</ItemKelas>
+
+		<div v-if="joinedClass.length == 0 && ownedClass.length == 0">
+			<h2 class="mt-6 text-body-lg">Kamu belum mengikuti kelas apapun...</h2>
+			<span class="text-body-lg">
+				Gunakan tombol Ikut Kelas untuk mengikuti kelas baru
+			</span>
 		</div>
 
-		<h2 class="mt-6 text-label-lg">Kelas yang diampu</h2>
-		<div
-			v-if="ownedClass.length > 0"
-			data-id="joined-classes"
-			class="p-2 mt-6 rounded-lg bg-surface"
-		>
-			<ItemKelas
-				v-for="(kelas, i) in ownedClass"
-				:key="i"
-				:item-id="kelas.id"
-				:title="kelas.judul"
-				:owner-names="
-					kelas.asistenKelas?.map((a) => a.asisten?.user?.name).sort() ??
-					[]
-				"
-				@item-click="updateSelectedClass(kelas)"
-			>
-				<hr
-					v-if="i != ownedClass.length - 1"
-					class="h-1 mx-4 my-2 text-outline"
-				/>
-			</ItemKelas>
+		<!-- joined kelas -->
+		<div v-if="joinedClass.length > 0">
+			<h2 class="mt-6 text-label-lg">Kelas yang diikuti</h2>
+			<div data-id="joined-classes" class="p-2 mt-6 rounded-lg bg-surface">
+				<ItemKelas
+					v-for="(kelas, i) in joinedClass"
+					:key="i"
+					:title="kelas.judul"
+					:item-id="kelas.id"
+					:owner-names="
+						kelas.asistenKelas
+							?.map((a) => a.asisten?.user?.name)
+							.sort() ?? []
+					"
+					@item-click="updateSelectedClass(kelas)"
+				>
+					<hr
+						v-if="i != joinedClass.length - 1"
+						class="h-1 mx-4 my-2 text-outline"
+					/>
+				</ItemKelas>
+			</div>
+		</div>
+
+		<!-- owned class -->
+		<div v-if="ownedClass.length > 0">
+			<h2 class="mt-6 text-label-lg">Kelas yang diampu</h2>
+			<div data-id="joined-classes" class="p-2 mt-6 rounded-lg bg-surface">
+				<ItemKelas
+					v-for="(kelas, i) in ownedClass"
+					:key="i"
+					:item-id="kelas.id"
+					:title="kelas.judul"
+					:owner-names="
+						kelas.asistenKelas
+							?.map((a) => a.asisten?.user?.name)
+							.sort() ?? []
+					"
+					@item-click="updateSelectedClass(kelas)"
+				>
+					<hr
+						v-if="i != ownedClass.length - 1"
+						class="h-1 mx-4 my-2 text-outline"
+					/>
+				</ItemKelas>
+			</div>
 		</div>
 
 		<BaseDialog v-if="showDialog != 'none'" @backdrop-click="hideDialog()">
@@ -111,7 +119,7 @@ const {
 	refreshClass,
 	updateSelectedClass,
 } = useGeneralStore()
-const { user, token } = useAuthStore()
+const { user, token, isAsisten } = useAuthStore()
 const { classes, showDialog } = toRefs(useGeneralStore())
 const api = useApi()
 
@@ -149,9 +157,14 @@ const onRefreshClass = async () => {
 	if (response.status >= 200 && response.status <= 299) {
 		const newClasses: Kelas[] = [
 			...response.data.kelas.map((kelas) => ({ ...kelas, owned: false })),
-			...response.data.owned.map((kelas) => ({ ...kelas, owned: true })),
 		]
+		if (response.data.owned) {
+			newClasses.push(
+				...response.data.owned.map((kelas) => ({ ...kelas, owned: true }))
+			)
+		}
 		refreshClass(newClasses)
+		console.log('mounted', classes.value)
 	} else {
 		addToast({
 			id: nanoid(),

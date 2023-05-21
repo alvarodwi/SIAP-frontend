@@ -7,12 +7,12 @@
 				class="mr-2 text-title-small"
 			>
 				<span v-if="i == crumbs.length - 1">/ {{ crumb.name }}</span>
-				<NuxtLink
-					v-else
-					:to="crumb.url"
-					class="after:content-[/] cursor-pointer underline text-tertiary"
-				>
-					/ {{ crumb.name }}
+
+				<NuxtLink v-else :to="crumb.url" class="after:content-[/]">
+					<span>{{ '/ ' }}</span>
+					<span class="cursor-pointer underline text-tertiary">{{
+						crumb.name
+					}}</span>
 				</NuxtLink>
 			</li>
 		</ol>

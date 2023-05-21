@@ -1,9 +1,11 @@
 import { defineStore } from 'pinia'
 import { Kelas } from '~/models/Kelas'
+import { Pertemuan } from '~/models/Pertemuan'
 import { ToastData } from '~/models/ToastData'
 import { DialogType } from '~/models/state/DialogType'
 
 export type GeneralState = {
+	selectedPertemuan: Pertemuan | null
 	selectedClass: Kelas | null
 	classes: Kelas[]
 	toasts: ToastData[]
@@ -15,6 +17,7 @@ export const useGeneralStore = defineStore({
 	id: 'general',
 	state: () =>
 		({
+			selectedPertemuan: null,
 			selectedClass: null,
 			classes: [],
 			toasts: [],
@@ -44,6 +47,14 @@ export const useGeneralStore = defineStore({
 		},
 		updateSelectedClass(kelas: Kelas | null) {
 			this.$state.selectedClass = kelas
+		},
+		updateSelectedPertemuan(pertemuan: Pertemuan | null) {
+			this.$state.selectedPertemuan = pertemuan
+		},
+		flushUserData() {
+			this.$state.classes = []
+			this.$state.selectedClass = null
+			this.$state.selectedPertemuan = null
 		},
 	},
 	persist: true,

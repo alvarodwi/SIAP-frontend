@@ -1,5 +1,5 @@
 <template>
-	<NuxtLink :to="`kelas/${itemId}`">
+	<NuxtLink :to="`k/${itemId}`">
 		<div
 			class="flex flex-col p-2 mx-4 my-4 rounded-lg cursor-pointer interactive-bg-surface"
 			@click="$emit('itemClick')"

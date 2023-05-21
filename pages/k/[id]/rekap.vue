@@ -7,73 +7,75 @@
 	<div class="p-6 overflow-x-hidden overflow-y-auto">
 		<Breadcrumb :crumbs="crumbs" />
 		<!-- header -->
-		<div data-id="header" class="flex flex-col w-fit">
+		<div data-id="header" class="flex flex-col w-fit min-w-[30%]">
 			<div class="flex flex-row items-center mt-6">
 				<div class="flex flex-col">
-					<h1 class="text-headline-md">Hi, {{ username() }} 👋</h1>
-					<span class="text-title-md"
-						>Semangat terus praktikumnya yaa!</span
-					>
-				</div>
-				<div class="ml-9">
-					<button
-						type="button"
-						class="px-4 py-3 mr-4 font-bold border rounded-lg interactive-bg-surface border-primary text-title-sm"
-					>
-						Lihat Rekap Presensi
-					</button>
-					<button
-						type="button"
-						class="px-4 py-3 font-bold border rounded-lg interactive-bg-surface border-primary text-title-sm"
-					>
-						Kelola Praktikan
-					</button>
+					<h1 class="text-headline-md">Rekap Presensi</h1>
+					<span class="text-title-md">{{ selectedClass?.judul }}</span>
 				</div>
 			</div>
 			<hr class="h-1 mt-6 text-outline" />
 		</div>
-		<!-- filter button -->
-		<div class="flex flex-row gap-4 mt-6">
-			<button
-				class="px-4 py-3 border rounded-lg border-outline text-label-lg"
-				:class="
-					state.filter == 'pertemuan'
-						? 'interactive-bg-primary'
-						: 'interactive-bg-surface'
-				"
-				@click="toggleFilter"
+
+		<!-- tabel rekap asisten -->
+		<div v-if="!selectedClass?.owned" class="mt-4">
+			<span>
+				Persentase kehadiran kamu adalah 100%, berikut adalah rinciannya
+			</span>
+			<table
+				data-id="table"
+				class="border border-separate rounded-lg table-auto border-outline w-3/4 mt-4 text-body-md text-center"
 			>
-				Pertemuan
-			</button>
-			<button
-				class="px-4 py-3 border rounded-lg border-outline text-label-lg"
-				:class="
-					state.filter == 'pengumuman'
-						? 'interactive-bg-primary'
-						: 'interactive-bg-surface'
-				"
-				@click="toggleFilter"
-			>
-				Pengumuman
-			</button>
+				<thead>
+					<tr class="">
+						<th class="bg-surface px-3 py-3 text-left">Pertemuan ke-</th>
+						<th v-for="i in 16" :key="i">
+							{{ i }}
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr class="p-2">
+						<th class="bg-surface px-3 py-3 text-left">Kehadiran</th>
+						<td v-for="p in 16" :key="p" class="px-3 py-3">✔️</td>
+					</tr>
+				</tbody>
+			</table>
 		</div>
 
-		<!-- list pertemuan -->
-		<div v-if="state.filter == 'pertemuan'" class="flex flex-col mt-5">
-			<ItemPertemuan
-				v-for="i in 5"
-				:key="i"
-				@form-izin-click="onFormIzinClick"
+		<!-- tabel rekap asisten -->
+		<div v-if="selectedClass?.owned" class="mt-4">
+			<span>
+				Berikut adalah rekap kehadiran praktikan di kelas "{{
+					selectedClass?.judul
+				}}"
+			</span>
+			<table
+				data-id="table"
+				class="border border-separate rounded-lg table-auto border-outline w-3/4 mt-4 text-body-md"
 			>
-				<hr v-if="i != 5" class="h-1 mt-4 text-outline" />
-			</ItemPertemuan>
-		</div>
-
-		<!-- list pengumuman -->
-		<div v-if="state.filter == 'pengumuman'" class="flex flex-col mt-5">
-			<ItemPengumuman v-for="i in 5" :key="i">
-				<hr v-if="i != 5" class="h-1 mt-4 text-outline" />
-			</ItemPengumuman>
+				<thead>
+					<tr class="bg-surface">
+						<th rowspan="2">NPM</th>
+						<th rowspan="2">Nama</th>
+						<th colspan="16" class="px-2 py-2">Pertemuan ke-</th>
+					</tr>
+					<tr class="bg-surface">
+						<th v-for="i in 16" :key="i" class="px-2 py-2 text-center">
+							{{ i }}
+						</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr v-for="item in 10" :key="item" class="p-2">
+						<td class="px-3 py-3">140810200001</td>
+						<td class="px-3 py-3">Ariq Hakim Ruswadi</td>
+						<td v-for="p in 16" :key="p" class="px-3 py-3 text-center">
+							✔️
+						</td>
+					</tr>
+				</tbody>
+			</table>
 		</div>
 
 		<BaseDialog v-if="showDialog != 'none'" @backdrop-click="hideDialog()">
@@ -87,36 +89,14 @@
 				@submit="onSubmitJoinClass"
 				@close="hideDialog()"
 			/>
-			<DialogCreatePertemuan
-				v-if="showDialog == 'create-pertemuan'"
-				index="2"
-				:nama-kelas="selectedClass?.judul ?? 'ini'"
-				@submit="onSubmitCreatePertemuan"
-				@close="hideDialog()"
-			/>
-			<DialogCreatePengumuman
-				v-if="showDialog == 'create-pengumuman'"
-				:nama-kelas="selectedClass?.judul ?? 'ini'"
-				@submit="onSubmitCreatePengumuman"
-				@close="hideDialog()"
-			/>
-			<DialogFormIzin
-				v-if="showDialog == 'form-izin'"
-				:index="state.selectedPertemuanIndex"
-				:nama-kelas="selectedClass?.judul ?? 'ini'"
-				@submit="onSubmitFormIzin"
-				@close="hideDialog()"
-			/>
 		</BaseDialog>
 	</div>
 </template>
 
 <script setup lang="ts">
 import { Kelas } from '~/models/Kelas'
-import { BuatIzin } from '~/models/forms/BuatIzin'
+import { Presensi } from '~/models/Presensi'
 import { BuatKelas } from '~/models/forms/BuatKelas'
-import { BuatPengumuman } from '~/models/forms/BuatPengumuman'
-import { BuatPertemuan } from '~/models/forms/BuatPertemuan'
 import { IkutKelas } from '~/models/forms/IkutKelas'
 import { BreadcrumbData } from '~/models/state/BreadcrumbData'
 import { FabAction } from '~/models/state/FabAction'
@@ -124,38 +104,21 @@ import { FabAction } from '~/models/state/FabAction'
 definePageMeta({ middleware: 'auth' })
 
 const { addToast, toggleDialog, hideDialog, refreshClass } = useGeneralStore()
-const { user, token } = useAuthStore()
+const { token } = useAuthStore()
 const { selectedClass, showDialog } = toRefs(useGeneralStore())
 const api = useApi()
+const route = useRoute()
 
 useHead({
-	title: `Detail Kelas`,
+	title: `Rekap Presensi - ${selectedClass.value?.judul}`,
 })
 
 interface State {
-	filter: 'pertemuan' | 'pengumuman'
-	selectedPertemuanIndex: number
+	items: Presensi[]
 }
 const state = reactive<State>({
-	filter: 'pertemuan',
-	selectedPertemuanIndex: 0,
+	items: [],
 })
-
-const toggleFilter = () => {
-	if (state.filter == 'pertemuan') {
-		state.filter = 'pengumuman'
-	} else {
-		state.filter = 'pertemuan'
-	}
-}
-
-const username = () => {
-	if (user) {
-		return user.name.split(' ').slice(0, 2).join(' ')
-	} else {
-		return ''
-	}
-}
 
 const crumbs = computed<BreadcrumbData[]>(() => [
 	{
@@ -164,6 +127,10 @@ const crumbs = computed<BreadcrumbData[]>(() => [
 	},
 	{
 		name: selectedClass.value?.judul ?? 'Detail Kelas',
+		url: `/k/${route.params.id}`,
+	},
+	{
+		name: 'Rekap Presensi',
 	},
 ])
 
@@ -216,11 +183,6 @@ const onRefreshClass = async () => {
 	}
 }
 
-const onFormIzinClick = (index: number) => {
-	state.selectedPertemuanIndex = index
-	toggleDialog('form-izin')
-}
-
 const onSubmitCreateClass = async (data: BuatKelas) => {
 	hideDialog()
 	const response = await api.kelas.createKelas(token, {
@@ -269,20 +231,5 @@ const onSubmitJoinClass = async (data: IkutKelas) => {
 			message: response.message,
 		})
 	}
-}
-
-const onSubmitCreatePengumuman = (data: BuatPengumuman) => {
-	hideDialog()
-	console.log(data)
-}
-
-const onSubmitCreatePertemuan = (data: BuatPertemuan) => {
-	hideDialog()
-	console.log(data)
-}
-
-const onSubmitFormIzin = (data: BuatIzin) => {
-	hideDialog()
-	console.log(data)
 }
 </script>
