@@ -12,6 +12,7 @@
 			:maxLength="maxLength"
 			:placeholder="placeholder"
 			:disabled="disabled"
+			style="resize: none"
 		/>
 		<span v-if="error" class="mt-2 text-error text-body-md">
 			{{ error }}

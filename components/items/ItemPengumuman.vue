@@ -7,8 +7,8 @@
 				<span class="font-bold text-headline-sm">
 					{{ props.data.judul }}
 				</span>
-				<span class="text-title-md"
-					>{{
+				<span class="text-title-md">
+					{{
 						format(parseISO(props.data.date), 'eeee, dd MMMM yyyy - p', {
 							locale: id,
 						})

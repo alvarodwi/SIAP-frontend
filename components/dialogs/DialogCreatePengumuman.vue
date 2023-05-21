@@ -70,6 +70,7 @@
 	>
 		<DialogCreateAttachment
 			v-if="state.isNestedDialogOpen"
+			@close="toggleNestedDialog"
 			@submit="(data : BuatAttachment) => onSubmitCreateAttachment(data)"
 		/>
 	</BaseDialog>

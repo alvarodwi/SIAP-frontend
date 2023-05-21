@@ -1,3 +1,4 @@
+import { Presensi } from '~/models/Presensi'
 import HttpFactory from '~/repository/factory'
 import { ApiResponse, StatusData } from '~/repository/types'
 
@@ -18,7 +19,58 @@ class PresensiModule extends HttpFactory {
 			{
 				headers: {
 					Authorization: `Bearer ${token}`,
-					'Content-Type': 'multipart/form-data',
+				},
+			}
+		)
+	}
+
+	async fetchPresensiByKelas(
+		token: string,
+		idKelas: string
+	): Promise<ApiResponse<Presensi[]>> {
+		return await this.call(
+			'GET',
+			`/kelas/${idKelas}/presensi/all`,
+			undefined,
+			{
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			}
+		)
+	}
+
+	async fetchPresensiById(
+		token: string,
+		idKelas: string,
+		idPertemuan: string,
+		idPresensi: string
+	): Promise<ApiResponse<Presensi>> {
+		return await this.call(
+			'GET',
+			`/kelas/${idKelas}/pertemuan/${idPertemuan}/presensi/${idPresensi}`,
+			undefined,
+			{
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			}
+		)
+	}
+
+	async validatePresensi(
+		token: string,
+		idKelas: string,
+		idPertemuan: string,
+		idPresensi: string
+	): Promise<ApiResponse<StatusData>> {
+		return await this.call<ApiResponse<StatusData>>(
+			'PUT',
+			`/kelas/${idKelas}/pertemuan/${idPertemuan}/presensi/${idPresensi}`,
+			undefined,
+			{
+				headers: {
+					Authorization: `Bearer ${token}`,
 				},
 			}
 		)

@@ -4,8 +4,8 @@ import { User } from './User'
 export interface Presensi {
 	id: string
 	bukti?: string
-	date?: Date
+	date?: string
 	status?: StatusKehadiran
-	isValidate?: boolean
+	isValidate: boolean
 	user: User
 }
