@@ -3,7 +3,7 @@ import { Kelas } from '~/models/Kelas'
 
 export interface AllKelasData {
 	kelas: Kelas[]
-	owned: Kelas[]
+	owned?: Kelas[]
 }
 
 export interface CreateKelasBody {

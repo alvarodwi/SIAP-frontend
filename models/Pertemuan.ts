@@ -1,13 +1,11 @@
-import { Perizinan } from './Perizinan'
-import { Presensi } from './Presensi'
+import { Kelas } from './Kelas'
 
 export interface Pertemuan {
 	id: string
 	judul: string
 	deskripsi: string
-	startDate: Date
-	endDate: Date
+	startDate: string
+	endDate: string
 	indexPert: number
-	presensi: Presensi[]
-	perizinan: Perizinan[]
+	kelas: Kelas
 }

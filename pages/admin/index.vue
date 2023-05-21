@@ -42,12 +42,14 @@ const refresh = async () => {
 	console.log(response)
 
 	if (response.status >= 200 && response.status <= 299) {
-		data.value = response.data.data.map((approval) => ({
-			id: approval.id,
-			Nama: approval.user.name,
-			NPM: approval.user.npm,
-			status: approval.status,
-		}))
+		data.value = response.data.data
+			.map((approval) => ({
+				id: approval.id,
+				Nama: approval.user.name,
+				NPM: approval.user.npm,
+				status: approval.status,
+			}))
+			.sort((a, b) => (a.NPM > b.NPM ? 1 : b.NPM > a.NPM ? -1 : 0))
 	} else {
 		addToast({
 			id: nanoid(),

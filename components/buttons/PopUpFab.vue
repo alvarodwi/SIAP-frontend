@@ -1,11 +1,20 @@
 <template>
-	<div class="bottom-0 right-0 flex flex-col items-end m-4">
+	<div
+		class="bottom-0 right-0 flex flex-col items-end m-4"
+		tabindex="-1"
+		@blur="toggleState"
+	>
 		<div v-if="state.isPopupOpen" class="mr-9">
 			<div
 				v-for="action in actions"
 				:key="action.name"
 				class="flex flex-row gap-4 mb-2 cursor-pointer group z-90 drop-shadow-lg"
-				@click="$emit('actionClick', action.name)"
+				@click="
+					() => {
+						$emit('actionClick', action.name)
+						toggleState()
+					}
+				"
 			>
 				<div
 					class="flex items-center justify-center px-4 font-bold rounded-lg text-label-lg interactive-bg-primary-container grow group-hover:bg-primary-container-hover"
@@ -20,12 +29,12 @@
 			</div>
 		</div>
 		<!-- button -->
-		<div
+		<button
 			class="flex items-center w-20 h-20 rounded-full interactive-bg-primary drop-shadow-lg z-90"
 			@click="toggleState"
 		>
 			<Icon name="tabler:plus" class="mx-auto h-9 w-9" />
-		</div>
+		</button>
 	</div>
 </template>
 

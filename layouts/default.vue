@@ -31,7 +31,7 @@
 
 <script setup lang="ts">
 const { user, onLogout } = useAuthStore()
-const { addToast, toggleDialog } = useGeneralStore()
+const { addToast, toggleDialog, flushUserData } = useGeneralStore()
 
 const username = () => {
 	if (user) {
@@ -50,6 +50,7 @@ const state = reactive<State>({
 })
 
 const logout = () => {
+	flushUserData()
 	onLogout()
 	addToast({
 		id: nanoid(),
