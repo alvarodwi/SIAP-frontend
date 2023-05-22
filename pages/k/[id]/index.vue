@@ -11,21 +11,21 @@
 		<div data-id="header" class="flex flex-col w-fit min-w-[40%]">
 			<div class="flex flex-row items-center mt-6">
 				<div class="flex flex-col">
-					<h1 class="text-headline-md">{{ selectedClass?.judul }}</h1>
+					<h1 class="text-headline-md">{{ state.currentClass?.judul }}</h1>
 					<span class="text-title-md">
 						{{
 							(
-								selectedClass?.asistenKelas
+								state.currentClass?.asistenKelas
 									?.map((a) => a.asisten?.user?.name)
 									.sort() ?? []
-							).join(',')
+							).join(', ')
 						}}
 					</span>
-					<span class="text-title-sm mt-2">
-						Kode Kelas : {{ selectedClass?.kode }}
+					<span class="mt-2 text-title-sm">
+						Kode Kelas : {{ state.currentClass?.kode }}
 					</span>
 				</div>
-				<div class="flex flex-row grow justify-end ml-9">
+				<div class="flex flex-row justify-end grow ml-9">
 					<NuxtLink :to="`${$route.params.id}/rekap`">
 						<button
 							type="button"
@@ -143,7 +143,6 @@
 </template>
 
 <script setup lang="ts">
-import { format } from 'date-fns'
 import { Kelas } from '~/models/Kelas'
 import { Broadcast } from '~/models/Broadcast'
 import { BuatIzin } from '~/models/forms/BuatIzin'
@@ -157,13 +156,7 @@ import { PertemuanByKelasData } from '~/repository/modules/pertemuan/types'
 
 definePageMeta({ middleware: 'auth' })
 
-const {
-	addToast,
-	toggleDialog,
-	hideDialog,
-	refreshClass,
-	updateSelectedClass,
-} = useGeneralStore()
+const { addToast, toggleDialog, hideDialog, refreshClass } = useGeneralStore()
 const { token } = useAuthStore()
 const { selectedClass, showDialog } = toRefs(useGeneralStore())
 const api = useApi()
@@ -175,12 +168,14 @@ useHead({
 
 interface State {
 	filter: 'pertemuan' | 'pengumuman'
+	currentClass: Kelas | null
 	selectedPertemuanIndex: number
 	listPertemuan: PertemuanByKelasData[]
 	listPengumuman: Broadcast[]
 }
 const state = reactive<State>({
 	filter: 'pertemuan',
+	currentClass: null,
 	selectedPertemuanIndex: 0,
 	listPertemuan: [],
 	listPengumuman: [],
@@ -257,8 +252,6 @@ const onRefreshBroadcast = async () => {
 const onRefreshClass = async () => {
 	const response = await api.kelas.fetchAllKelas(token)
 
-	console.log('on mounted', response)
-
 	if (response.status >= 200 && response.status <= 299) {
 		const newClasses: Kelas[] = [
 			...response.data.kelas.map((kelas) => ({ ...kelas, owned: false })),
@@ -282,10 +275,10 @@ const onRefreshCurrentClass = async () => {
 	const response = await api.kelas.fetchKelasById(token, idKelas)
 
 	if (response.status >= 200 && response.status <= 299) {
-		updateSelectedClass({
+		state.currentClass = {
 			...response.data.kelas,
 			owned: response.data.isAsisten,
-		})
+		}
 	} else {
 		addToast({
 			id: nanoid(),
@@ -313,7 +306,7 @@ const onSubmitCreateClass = async (data: BuatKelas) => {
 	const response = await api.kelas.createKelas(token, {
 		judul: data.judul,
 		deskripsi: data.deskripsi,
-		otherAsisten: data.listAsisten,
+		otherAsisten: data.listAsistenId.map((id) => ({ id })),
 	})
 
 	console.log(response)
@@ -364,7 +357,7 @@ const onSubmitCreatePengumuman = async (data: BuatPengumuman) => {
 	const response = await api.broadcast.createBroadcast(token, idKelas, {
 		judul: data.judul,
 		deskripsi: data.deskripsi,
-		date: format(data.date, 'dd/MM/yyyy hh:mm:ss'),
+		date: formatDateString(data.date, 'dd/MM/yyyy hh:mm:ss'),
 		attachments: data.attachments,
 	})
 
@@ -391,8 +384,8 @@ const onSubmitCreatePertemuan = async (data: BuatPertemuan) => {
 	const response = await api.pertemuan.createPertemuan(token, idKelas, {
 		indexPertemuan: data.indexPertemuan,
 		judul: data.judul,
-		startDate: format(
-			data.startDate ? data.startDate : Date.now(),
+		startDate: formatDateString(
+			data.startDate ? data.startDate : new Date(),
 			'dd/MM/yyyy hh:mm:ss'
 		),
 	})

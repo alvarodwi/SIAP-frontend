@@ -28,12 +28,71 @@
 			:rows="5"
 			placeholder="Tulis deskripsi kelas disini"
 		/>
-		<FormInputSelect
-			v-model="formData.listAsisten"
-			label="Pengampu Lainnya"
-			:options="listAsprak"
-			class="mt-6"
-		/>
+		<div class="flex flex-col mt-6">
+			<span data-id="label" class="text-title-md">Pengampu Lainnya</span>
+			<Combobox v-model="selectedOptions" multiple>
+				<div class="relative mt-1">
+					<div
+						class="mt-2 w-full bg-surface-variant rounded-lg text-body-md min-w-[440px] border-r-[16px] border-transparent items-center justify-start flex flex-row gap-2"
+					>
+						<ComboboxInput
+							class="px-3 py-2 text-sm leading-5 bg-transparent border-none grow focus:outline-none"
+							@change="queryAsprak = $event.target.value"
+						/>
+						<ComboboxButton class="inset-y-0 right-0 flex items-center">
+							<Icon
+								name="tabler:chevron-down"
+								class="w-5 h-5 text-gray-400"
+								aria-hidden="true"
+							/>
+						</ComboboxButton>
+					</div>
+					<TransitionRoot
+						leave="transition ease-in duration-100"
+						leave-from="opacity-100"
+						leave-to="opacity-0"
+						@after-leave="queryAsprak = ''"
+					>
+						<ComboboxOptions
+							class="absolute w-full py-2 mt-1 rounded-lg cursor-pointer bg-surface-variant grow"
+						>
+							<div
+								v-if="options.length === 0 && queryAsprak !== ''"
+								class="p-2 interactive-bg-surface-variant"
+							>
+								Nothing found.
+							</div>
+
+							<ComboboxOption
+								v-for="option in options"
+								:key="option.value"
+								:value="option"
+								class="p-2 interactive-bg-surface-variant"
+							>
+								<span class="w-full px-3 py-2 truncate text-body-md">
+									{{ option.name }}
+								</span>
+							</ComboboxOption>
+						</ComboboxOptions>
+					</TransitionRoot>
+				</div>
+			</Combobox>
+			<div class="flex flex-row flex-wrap max-w-full gap-2 overflow-y-auto">
+				<div
+					v-for="(selected, i) in selectedOptions"
+					:key="i"
+					class="flex flex-row items-center gap-2 px-2 py-1 mt-2 rounded-lg cursor-pointer interactive-bg-surface-variant w-fit"
+				>
+					<span>{{ selected.name }}</span>
+					<icon
+						name="tabler:x"
+						class="text-error hover:bg-surface-variant-hover"
+						@click="removeSelectedOption(i)"
+					/>
+				</div>
+			</div>
+		</div>
+
 		<button
 			type="submit"
 			class="px-16 py-3 mx-auto mt-9 font-bold rounded-lg interactive-bg-primary min-w-[40%]"
@@ -45,25 +104,67 @@
 </template>
 
 <script setup lang="ts">
+import {
+	Combobox,
+	ComboboxInput,
+	ComboboxButton,
+	ComboboxOptions,
+	ComboboxOption,
+	TransitionRoot,
+} from '@headlessui/vue'
 import { BuatKelas } from '~/models/forms/BuatKelas'
 import { DropdownItem } from '~/models/state/DropdownItem'
 
 const formData: BuatKelas = reactive({
 	judul: '',
 	deskripsi: '',
-	listAsisten: [],
+	listAsistenId: [],
 })
 
-const listAsprak: DropdownItem[] = [
-	{
-		name: 'Rihlan Lumenda',
-		value: 'rihlan13',
-	},
-	{
-		name: 'Rafiansyah Rasyid',
-		value: 'acid49',
-	},
-]
+const api = useApi()
+const { token } = useAuthStore()
+
+const queryAsprak = ref('')
+const selectedOptions = ref<DropdownItem[]>([])
+const options = ref<DropdownItem[]>([])
+
+watch(
+	() => queryAsprak.value,
+	(to) => {
+		options.value = listAsisten.filter((a) =>
+			a.name.toLowerCase().startsWith(to.toLowerCase())
+		)
+	}
+)
+
+watch(
+	() => selectedOptions.value,
+	(to) => {
+		formData.listAsistenId = to.map((a) => a.value)
+	}
+)
+
+onMounted(() => {
+	onSearchAsisten()
+})
+
+let listAsisten: DropdownItem[] = []
+
+const onSearchAsisten = async () => {
+	const response = await api.asisten.fetchAsisten(token, '', 0, 100)
+
+	if (response.status >= 200 && response.status <= 299) {
+		listAsisten = response.data.data.map((a) => ({
+			name: a.user?.name ?? '',
+			value: a.id,
+		}))
+		options.value = listAsisten.slice(0, 5)
+	}
+}
+
+const removeSelectedOption = (index: number) => {
+	selectedOptions.value.splice(index, 1)
+}
 
 defineEmits(['submit', 'close'])
 </script>

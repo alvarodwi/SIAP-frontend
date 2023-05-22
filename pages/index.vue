@@ -10,7 +10,7 @@
 						>Semangat terus praktikumnya yaa!</span
 					>
 				</div>
-				<div class="flex flex-row ml-9 grow items-end justify-end">
+				<div class="flex flex-row items-end justify-end ml-9 grow">
 					<button
 						v-if="isAsisten"
 						type="button"
@@ -152,8 +152,6 @@ onMounted(async () => {
 const onRefreshClass = async () => {
 	const response = await api.kelas.fetchAllKelas(token)
 
-	console.log('on mounted', response)
-
 	if (response.status >= 200 && response.status <= 299) {
 		const newClasses: Kelas[] = [
 			...response.data.kelas.map((kelas) => ({ ...kelas, owned: false })),
@@ -179,7 +177,7 @@ const onSubmitCreateClass = async (data: BuatKelas) => {
 	const response = await api.kelas.createKelas(token, {
 		judul: data.judul,
 		deskripsi: data.deskripsi,
-		otherAsisten: data.listAsisten,
+		otherAsisten: data.listAsistenId.map((id) => ({ id })),
 	})
 
 	console.log(response)

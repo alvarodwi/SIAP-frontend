@@ -1,25 +1,25 @@
 <template>
 	<div class="pb-4 mt-6 flex flex-col w-[25%] mx-auto h-auto">
 		<video
-			v-show="!isNewPhoto"
+			v-show="!state.isNewPhoto"
 			ref="video"
 			class="rounded-lg aspect-square"
 		/>
 		<canvas
-			v-show="isNewPhoto"
+			v-show="state.isNewPhoto"
 			ref="canvas"
 			class="rounded-lg aspect-square"
 		/>
 
 		<button
-			v-show="!isTakingPhoto"
+			v-if="!state.isTakingPhoto"
 			class="interactive-bg-primary font-bold px-3 py-2 mt-4 rounded-lg"
 			@click="takePhoto()"
 		>
 			<span>Ambil Foto</span>
 		</button>
 
-		<div v-show="isTakingPhoto" class="flex flex-col mt-4 items-center">
+		<div v-if="state.isTakingPhoto" class="flex flex-col mt-4 items-center">
 			<span>Foto diambil pada {{ timestamp }}</span>
 			<button
 				class="interactive-bg-primary font-bold px-3 py-2 mt-6 rounded-lg"
@@ -32,18 +32,23 @@
 </template>
 
 <script setup lang="ts">
-import { format } from 'date-fns'
-import { id } from 'date-fns/locale'
+interface State {
+	isNewPhoto: boolean
+	isOpenCamera: boolean
+	isTakingPhoto: boolean
+}
+const state = reactive<State>({
+	isNewPhoto: false,
+	isOpenCamera: false,
+	isTakingPhoto: false,
+})
 
 defineEmits(['submitClick'])
 
 let file = ref<File | null>(null)
 let video = ref<HTMLVideoElement | null>(null)
 let canvas = ref<HTMLCanvasElement | null>(null)
-let isNewPhoto = ref(false)
-let isOpenCamera = ref(false)
 let photoData = ref('')
-let isTakingPhoto = ref(false)
 let timestamp = ref('')
 
 onMounted(() => {
@@ -82,28 +87,35 @@ const takePhoto = () => {
 			canvasLocal.width,
 			canvasLocal.height
 		)
-		isNewPhoto.value = true
+		state.isNewPhoto = true
 		photoData.value = canvasLocal.toDataURL()
 
-		isTakingPhoto.value = true
-		timestamp.value = format(new Date(), 'eeee, dd MMMM yyyy p', {
-			locale: id,
-		})
+		state.isTakingPhoto = true
+		timestamp.value = formatDateString(new Date(), 'eeee, dd MMMM yyyy p')
 
 		convertBlobToUrl()
+		stopCamera()
 	}
 }
 
 const convertBlobToUrl = async () => {
 	const blob = await (await fetch(photoData.value)).blob()
 	file.value = new File([blob], 'presensi.png', { type: blob.type })
-	isOpenCamera.value = false
+	state.isOpenCamera = false
 }
 
-onUnmounted(() => {
+const stopCamera = () => {
 	if (video.value) {
+		;(video.value.srcObject as MediaStream)
+			.getTracks()
+			.forEach((stream) => stream.stop())
+
 		video.value.pause()
 		video.value.currentTime = 0
 	}
+}
+
+onUnmounted(() => {
+	stopCamera()
 })
 </script>

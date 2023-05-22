@@ -7,25 +7,16 @@
 				</span>
 				<span class="text-title-md">
 					{{
-						format(
-							parseISO(props.data.startDate),
-							'eeee, dd MMMM yyyy - p',
-							{
-								locale: id,
-							}
+						formatISODateString(
+							props.data.startDate,
+							'eeee, dd MMMM yyyy - p'
 						)
 					}}
-					~
-					{{
-						' ' +
-						format(parseISO(props.data.endDate), 'p', {
-							locale: id,
-						})
-					}}
+					{{ formatISODateString(props.data.endDate, ' ~ p') }}
 				</span>
 			</div>
 			<button
-				v-if="!props.isAsisten && !props.data.presensi[0]"
+				v-if="!props.isAsisten && props.data?.presensi"
 				class="px-4 font-bold border rounded-lg text-title-sm interactive-bg-surface border-primary"
 				type="button"
 				@click="$emit('formIzinClick', props.index)"
@@ -52,14 +43,10 @@
 					<div
 						v-if="!props.isAsisten"
 						class="flex items-center mx-4 rounded-full w-9 h-9 justify-normal"
-						:class="
-							props.data.presensi[0]
-								? 'bg-primary'
-								: 'border-2 border-primary'
-						"
+						:class="presensi ? 'bg-primary' : 'border-2 border-primary'"
 					>
 						<Icon
-							v-if="props.data.presensi[0]"
+							v-if="presensi"
 							name="tabler:check"
 							class="w-6 h-6 mx-auto"
 						/>
@@ -72,8 +59,7 @@
 </template>
 
 <script setup lang="ts">
-import { format, parseISO } from 'date-fns'
-import { id } from 'date-fns/locale'
+import { Presensi } from '~/models/Presensi'
 import { PertemuanByKelasData } from '~/repository/modules/pertemuan/types'
 
 interface Props {
@@ -82,6 +68,10 @@ interface Props {
 	isAsisten: boolean
 }
 const props = defineProps<Props>()
+
+const presensi = computed<Presensi | null>(() => {
+	return props.data.presensi ? props.data.presensi[0] : null
+})
 
 defineEmits(['formIzinClick'])
 </script>

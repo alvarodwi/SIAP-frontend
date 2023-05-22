@@ -9,7 +9,7 @@ export interface AllKelasData {
 export interface CreateKelasBody {
 	judul: string
 	deskripsi: string
-	otherAsisten: AsistenPraktikum[]
+	otherAsisten: { id: string }[]
 }
 
 export interface JoinKelasBody {

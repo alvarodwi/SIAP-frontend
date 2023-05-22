@@ -9,9 +9,7 @@
 				</span>
 				<span class="text-title-md">
 					{{
-						format(parseISO(props.data.date), 'eeee, dd MMMM yyyy - p', {
-							locale: id,
-						})
+						formatISODateString(props.data.date, 'eeee, dd MMMM yyyy - p')
 					}}
 				</span>
 			</div>
@@ -44,8 +42,6 @@
 </template>
 
 <script setup lang="ts">
-import { format, parseISO } from 'date-fns'
-import { id } from 'date-fns/locale'
 import { Broadcast } from '~/models/Broadcast'
 import { marked } from 'marked'
 

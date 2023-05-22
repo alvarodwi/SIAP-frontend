@@ -16,29 +16,29 @@
 		</div>
 
 		<!-- validasi asprak -->
-		<div class="mt-6 flex flex-col relative">
+		<div class="relative flex flex-col mt-6">
 			<span class="text-title-sm">
 				Berikut adalah bukti presensi yang dikirimkan praktikan untuk
 				pertemuan kali ini
 			</span>
 
-			<div class="mt-8 w-full h-1/2 flex flex-row">
+			<div class="flex flex-row w-full mt-8 h-1/2">
 				<div class="flex items-center" @click="previousIndex()">
 					<Icon name="tabler:chevron-left" class="w-12 h-12" />
 				</div>
-				<div class="flex grow flex-col items-center">
+				<div class="flex flex-col items-center grow">
 					<div class="flex mx-auto max-h-[432px] justify-center">
 						<img
 							:src="state.currentPresensi?.bukti"
 							alt="foto-presensi"
-							class="rounded-lg object-cover h-full w-auto"
+							class="object-cover w-auto h-full rounded-lg"
 						/>
 					</div>
-					<span class="text-title-lg mt-6">
+					<span class="mt-6 text-title-lg">
 						{{ state.currentPresensi?.user.name }} -
 						{{ state.currentPresensi?.user.npm }}
 					</span>
-					<span class="text-title-sm mt-2">
+					<span class="mt-2 text-title-sm">
 						Foto diambil pada
 						{{
 							format(
@@ -54,22 +54,22 @@
 					</span>
 					<div
 						v-if="!state.currentPresensi?.isValidate"
-						class="flex flex-col px-2 py-3 mt-2 items-center"
+						class="flex flex-col items-center px-2 py-3 mt-2"
 					>
 						<button
-							class="px-6 py-2 w-fit rounded-lg interactive-bg-primary font-bold"
+							class="px-6 py-2 font-bold rounded-lg w-fit interactive-bg-primary"
 							@click="onAcceptPresensi"
 						>
 							Terima
 						</button>
-						<span class="text-label-md mt-2">
+						<span class="mt-2 text-label-md">
 							* Silakan abaikan tombol 'Terima' jika presensi di atas
 							tidak Anda anggap valid
 						</span>
 					</div>
 					<div
 						v-else
-						class="flex flex-col mt-4 items-center border-primary border bg-primary rounded-lg justify-center py-4 px-5"
+						class="flex flex-col items-center justify-center px-5 py-4 mt-4 border rounded-lg border-primary bg-primary"
 					>
 						<span class="text-title-sm">
 							Presensi telah dianggap valid
@@ -99,8 +99,6 @@
 </template>
 
 <script setup lang="ts">
-import { format, parseISO } from 'date-fns'
-import { id } from 'date-fns/locale'
 import { Kelas } from '~/models/Kelas'
 import { Pertemuan } from '~/models/Pertemuan'
 import { Presensi } from '~/models/Presensi'
@@ -231,8 +229,6 @@ const onRefreshCurrentPresensi = async (idPresensi: string) => {
 const onRefreshClass = async () => {
 	const response = await api.kelas.fetchAllKelas(token)
 
-	console.log('on mounted', response)
-
 	if (response.status >= 200 && response.status <= 299) {
 		const newClasses: Kelas[] = [
 			...response.data.kelas.map((kelas) => ({ ...kelas, owned: false })),
@@ -257,7 +253,7 @@ const onSubmitCreateClass = async (data: BuatKelas) => {
 	const response = await api.kelas.createKelas(token, {
 		judul: data.judul,
 		deskripsi: data.deskripsi,
-		otherAsisten: data.listAsisten,
+		otherAsisten: data.listAsistenId.map((id) => ({ id })),
 	})
 
 	console.log(response)

@@ -31,6 +31,23 @@ class BroadcastModule extends HttpFactory {
 			},
 		})
 	}
+
+	async deleteBroadcastById(
+		token: string,
+		idKelas: string,
+		idPengumuman: string
+	): Promise<ApiResponse<StatusData>> {
+		return await this.call(
+			'DELETE',
+			`/kelas/${idKelas}/broadcast/${idPengumuman}`,
+			undefined,
+			{
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			}
+		)
+	}
 }
 
 export default BroadcastModule
