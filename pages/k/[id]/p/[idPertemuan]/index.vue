@@ -37,12 +37,12 @@
 					<div class="flex">
 						<button
 							v-if="!isValidate"
-							class="mx-4 my-2 h-full grow py-3 border border-primary interactive-bg-surface rounded-lg text-label-lg font-bold"
+							class="h-full py-3 mx-4 my-2 font-bold border rounded-lg grow border-primary interactive-bg-surface text-label-lg"
 							@click="onLihatDetailClicked(id)"
 						>
 							Lihat Bukti
 						</button>
-						<span v-else class="mx-4 text-label-lg font-bold">
+						<span v-else class="mx-4 font-bold text-label-lg">
 							Sudah divalidasi
 						</span>
 					</div>
@@ -181,8 +181,6 @@ const onRefreshPresensi = async () => {
 const onRefreshClass = async () => {
 	const response = await api.kelas.fetchAllKelas(token)
 
-	console.log('on mounted', response)
-
 	if (response.status >= 200 && response.status <= 299) {
 		const newClasses: Kelas[] = [
 			...response.data.kelas.map((kelas) => ({ ...kelas, owned: false })),
@@ -207,7 +205,7 @@ const onSubmitCreateClass = async (data: BuatKelas) => {
 	const response = await api.kelas.createKelas(token, {
 		judul: data.judul,
 		deskripsi: data.deskripsi,
-		otherAsisten: data.listAsisten,
+		otherAsisten: data.listAsistenId.map((id) => ({ id })),
 	})
 
 	console.log(response)

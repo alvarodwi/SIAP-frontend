@@ -24,11 +24,11 @@
 			</span>
 			<table
 				data-id="table"
-				class="border border-separate rounded-lg table-auto border-outline w-3/4 mt-4 text-body-md text-center"
+				class="w-3/4 mt-4 text-center border border-separate rounded-lg table-auto border-outline text-body-md"
 			>
 				<thead>
 					<tr class="">
-						<th class="bg-surface px-3 py-3 text-left">Pertemuan ke-</th>
+						<th class="px-3 py-3 text-left bg-surface">Pertemuan ke-</th>
 						<th v-for="i in 16" :key="i">
 							{{ i }}
 						</th>
@@ -36,7 +36,7 @@
 				</thead>
 				<tbody>
 					<tr class="p-2">
-						<th class="bg-surface px-3 py-3 text-left">Kehadiran</th>
+						<th class="px-3 py-3 text-left bg-surface">Kehadiran</th>
 						<td v-for="p in 16" :key="p" class="px-3 py-3">✔️</td>
 					</tr>
 				</tbody>
@@ -52,7 +52,7 @@
 			</span>
 			<table
 				data-id="table"
-				class="border border-separate rounded-lg table-auto border-outline w-3/4 mt-4 text-body-md"
+				class="w-3/4 mt-4 border border-separate rounded-lg table-auto border-outline text-body-md"
 			>
 				<thead>
 					<tr class="bg-surface">
@@ -160,19 +160,21 @@ const onFabClicked = (name: string) => {
 const onRefreshClass = async () => {
 	const response = await api.kelas.fetchAllKelas(token)
 
-	console.log('on mounted', response)
-
 	if (response.status >= 200 && response.status <= 299) {
 		const newClasses: Kelas[] = [
 			...response.data.kelas.map((kelas: Kelas) => ({
 				...kelas,
 				owned: false,
 			})),
-			...response.data.owned.map((kelas: Kelas) => ({
-				...kelas,
-				owned: true,
-			})),
 		]
+		if (response.data.owned) {
+			newClasses.push(
+				...response.data.owned.map((kelas: Kelas) => ({
+					...kelas,
+					owned: true,
+				}))
+			)
+		}
 		refreshClass(newClasses)
 	} else {
 		addToast({
@@ -188,7 +190,7 @@ const onSubmitCreateClass = async (data: BuatKelas) => {
 	const response = await api.kelas.createKelas(token, {
 		judul: data.judul,
 		deskripsi: data.deskripsi,
-		otherAsisten: data.listAsisten,
+		otherAsisten: data.listAsistenId.map((id) => ({ id })),
 	})
 
 	console.log(response)

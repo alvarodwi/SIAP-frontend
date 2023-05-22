@@ -54,6 +54,23 @@ class PertemuanModule extends HttpFactory {
 			}
 		)
 	}
+
+	async deletePertemuanById(
+		token: string,
+		idKelas: string,
+		idPertemuan: string
+	): Promise<ApiResponse<StatusData>> {
+		return await this.call(
+			'DELETE',
+			`/kelas/${idKelas}/pertemuan/${idPertemuan}/delete`,
+			undefined,
+			{
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			}
+		)
+	}
 }
 
 export default PertemuanModule
