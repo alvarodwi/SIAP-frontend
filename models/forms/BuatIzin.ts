@@ -1,5 +1,5 @@
 export interface BuatIzin {
-	indexPertemuan: number
+	idPertemuan: string
 	alasan: string
-	bukti: string // base64
+	bukti: File | null
 }

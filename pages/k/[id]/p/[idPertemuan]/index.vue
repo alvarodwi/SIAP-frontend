@@ -28,23 +28,28 @@
 				pertemuan kali ini
 			</span>
 			<Table
-				class="mt-6 w-[80%]"
+				class="mt-6 w-[60%]"
 				:items="tableData"
 				:headers="tableHeader"
 				has-action
 			>
 				<template #action="{ id, isValidate }">
-					<div class="flex">
+					<div class="flex flex-col px-2">
 						<button
 							v-if="!isValidate"
-							class="h-full py-3 mx-4 my-2 font-bold border rounded-lg grow border-primary interactive-bg-surface text-label-lg"
+							class="py-3 px-6 my-2 font-bold border rounded-lg border-primary interactive-bg-surface text-label-lg"
 							@click="onLihatDetailClicked(id)"
 						>
 							Lihat Bukti
 						</button>
-						<span v-else class="mx-4 font-bold text-label-lg">
-							Sudah divalidasi
-						</span>
+						<div
+							v-else
+							class="px-3 py-2 rounded-lg flex flex-row items-center justify-center gap-2"
+						>
+							<span class="font-bold text-label-lg">
+								Sudah divalidasi ✅
+							</span>
+						</div>
 					</div>
 				</template>
 			</Table>
@@ -52,11 +57,32 @@
 
 		<!-- form presensi praktikan -->
 		<div v-if="!selectedClass?.owned">
-			<div v-if="state.listPresensi[0]">
-				<div class="pb-4 mt-6 flex flex-col w-[25%] mx-auto h-auto">
-					<img :src="state.listPresensi[0].bukti" />
+			<div v-if="state.currentPresensi">
+				<div class="pb-4 mt-12 flex flex-col">
+					<img
+						:src="state.currentPresensi.bukti"
+						class="w-[25%] mx-auto h-auto rounded-lg aspect-auto"
+					/>
 
-					<span>Foto diambil pada {{ timestamp }}</span>
+					<div class="flex flex-col items-center mt-9">
+						<span class="text-headline-md">
+							Status Presensi :
+							{{
+								state.currentPresensi.isValidate
+									? 'Sudah Divalidasi'
+									: 'Menunggu Validasi'
+							}}
+						</span>
+						<span class="text-title-sm">
+							Foto diambil pada
+							{{
+								formatISODateString(
+									state.currentPresensi.date ?? '',
+									'eeee, dd MMMM yyyy p'
+								)
+							}}
+						</span>
+					</div>
 				</div>
 			</div>
 			<div v-else>
@@ -168,7 +194,12 @@ const onRefreshPresensi = async () => {
 
 	if (response.status >= 200 && response.status <= 299) {
 		state.pertemuan = response.data.data
-		state.listPresensi = response.data.presensi.data
+
+		if (selectedClass.value?.owned) {
+			state.listPresensi = response.data.presensi.data
+		} else {
+			state.currentPresensi = response.data.presensi.data[0]
+		}
 	} else {
 		addToast({
 			id: nanoid(),
@@ -269,6 +300,7 @@ const onFormPresensiClick = async (file: File) => {
 	)
 
 	if (response.status >= 200 && response.status <= 299) {
+		onRefreshPresensi()
 		addToast({
 			id: nanoid(),
 			type: 'success',

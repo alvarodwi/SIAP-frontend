@@ -103,6 +103,31 @@
 			</Table>
 		</div>
 
+		<!-- tabel pengumuman -->
+		<div v-if="state.filter == 'praktikan'" class="mt-6">
+			<span class="text-title-sm">
+				Berikut adalah data praktikan yang ada di kelas
+				{{ selectedClass?.judul }}
+			</span>
+			<Table
+				class="mt-6 w-[80%]"
+				:items="tablePraktikanData"
+				:headers="tablePraktikanHeader"
+				has-action
+			>
+				<template #action="{ id }">
+					<div class="flex">
+						<button
+							class="h-full py-3 mx-4 my-2 font-bold border rounded-lg grow border-primary interactive-bg-error text-label-lg"
+							@click="onPraktikanDeleteClicked(id)"
+						>
+							Hapus
+						</button>
+					</div>
+				</template>
+			</Table>
+		</div>
+
 		<!-- dialog -->
 		<BaseDialog v-if="showDialog != 'none'" @backdrop-click="hideDialog()">
 			<DialogCreateClass
@@ -155,7 +180,7 @@ const crumbs = computed<BreadcrumbData[]>(() => [
 		url: `/k/${idKelas}`,
 	},
 	{
-		name: `Manage Kelas`,
+		name: `Kelola Kelas`,
 	},
 ])
 
@@ -185,6 +210,7 @@ const tablePraktikanHeader = ['Nama', 'NPM']
 
 onMounted(async () => {
 	onRefreshClass()
+	refreshTable()
 })
 
 watch(
@@ -207,6 +233,8 @@ const refreshTable = async () => {
 		case 'pengumuman':
 			onRefreshPengumuman()
 			break
+		case 'praktikan':
+			onRefreshPraktikan()
 		default:
 			break
 	}
@@ -254,6 +282,24 @@ const onRefreshPengumuman = async () => {
 	}
 }
 
+const onRefreshPraktikan = async () => {
+	const response = await api.user.fetchUsersByKelas(token, idKelas)
+
+	if (response.status >= 200 && response.status <= 299) {
+		tablePraktikanData.value = response.data.data.map((praktikan) => ({
+			id: praktikan.user.id,
+			Nama: praktikan.user.name,
+			NPM: praktikan.user.npm,
+		}))
+	} else {
+		addToast({
+			id: nanoid(),
+			type: 'error',
+			message: response.message,
+		})
+	}
+}
+
 const onPertemuanDeleteClicked = async (id: string) => {
 	const response = await api.pertemuan.deletePertemuanById(token, idKelas, id)
 
@@ -278,6 +324,25 @@ const onPengumumanDeleteClicked = async (id: string) => {
 
 	if (response.status >= 200 && response.status <= 299) {
 		onRefreshPengumuman()
+		addToast({
+			id: nanoid(),
+			type: 'success',
+			message: response.message,
+		})
+	} else {
+		addToast({
+			id: nanoid(),
+			type: 'error',
+			message: response.message,
+		})
+	}
+}
+
+const onPraktikanDeleteClicked = async (id: string) => {
+	const response = await api.user.deleteUserFromKelasById(token, idKelas, id)
+
+	if (response.status >= 200 && response.status <= 299) {
+		onRefreshPraktikan()
 		addToast({
 			id: nanoid(),
 			type: 'success',
