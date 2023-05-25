@@ -17,61 +17,46 @@
 			<hr class="h-1 mt-6 text-outline" />
 		</div>
 
-		<!-- tabel rekap asisten -->
-		<div v-if="!selectedClass?.owned" class="mt-4">
+		<!-- tabel rekap praktikan -->
+		<div class="mt-4 flex flex-col">
 			<span>
-				Persentase kehadiran kamu adalah 100%, berikut adalah rinciannya
+				Persentase kehadiran kamu adalah {{}}, berikut adalah rinciannya
 			</span>
+			<div class="grid grid-cols-2 w-fit grid-rows-2 items-center mt-4">
+				<span> Nama </span>
+				<span>: {{ user?.name }}</span>
+				<span> Npm</span>
+				<span>: {{ user?.npm }}</span>
+			</div>
 			<table
 				data-id="table"
-				class="w-3/4 mt-4 text-center border border-separate rounded-lg table-auto border-outline text-body-md"
-			>
-				<thead>
-					<tr class="">
-						<th class="px-3 py-3 text-left bg-surface">Pertemuan ke-</th>
-						<th v-for="i in 16" :key="i">
-							{{ i }}
-						</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr class="p-2">
-						<th class="px-3 py-3 text-left bg-surface">Kehadiran</th>
-						<td v-for="p in 16" :key="p" class="px-3 py-3">✔️</td>
-					</tr>
-				</tbody>
-			</table>
-		</div>
-
-		<!-- tabel rekap asisten -->
-		<div v-if="selectedClass?.owned" class="mt-4">
-			<span>
-				Berikut adalah rekap kehadiran praktikan di kelas "{{
-					selectedClass?.judul
-				}}"
-			</span>
-			<table
-				data-id="table"
-				class="w-3/4 mt-4 border border-separate rounded-lg table-auto border-outline text-body-md"
+				class="mt-6 text-center border border-separate rounded-lg border-outline text-body-md w-fit"
 			>
 				<thead>
 					<tr class="bg-surface">
-						<th rowspan="2">NPM</th>
-						<th rowspan="2">Nama</th>
-						<th colspan="16" class="px-2 py-2">Pertemuan ke-</th>
-					</tr>
-					<tr class="bg-surface">
-						<th v-for="i in 16" :key="i" class="px-2 py-2 text-center">
-							{{ i }}
-						</th>
+						<th class="px-6 py-3 text-left">Pertemuan ke-</th>
+						<th class="px-6 py-3 text-left">Mengisi Presensi</th>
+						<th class="px-6 py-3 text-left">Status Presensi</th>
+						<th class="px-6 py-3 text-left">Sudah Divalidasi?</th>
 					</tr>
 				</thead>
 				<tbody>
-					<tr v-for="item in 10" :key="item" class="p-2">
-						<td class="px-3 py-3">140810200001</td>
-						<td class="px-3 py-3">Ariq Hakim Ruswadi</td>
-						<td v-for="p in 16" :key="p" class="px-3 py-3 text-center">
-							✔️
+					<tr
+						v-for="(p, i) in state.items"
+						:key="p.idPertemuan"
+						class="p-2"
+					>
+						<td class="px-3 py-3">
+							{{ i + 1 }}
+						</td>
+						<td class="px-3 py-3">
+							<Icon v-if="p.data" name="tabler:check" class="h-6 w-6" />
+							<Icon v-else name="tabler:x" class="h-6 w-6" />
+						</td>
+						<td v-if="p.data" class="px-3 py-3">{{ p.data.status }}</td>
+						<td v-if="p.data" class="px-3 py-3">
+							<span v-if="p.data.isValidate">Sudah</span>
+							<span v-else>Belum</span>
 						</td>
 					</tr>
 				</tbody>
@@ -99,12 +84,11 @@ import { Presensi } from '~/models/Presensi'
 import { BuatKelas } from '~/models/forms/BuatKelas'
 import { IkutKelas } from '~/models/forms/IkutKelas'
 import { BreadcrumbData } from '~/models/state/BreadcrumbData'
-import { FabAction } from '~/models/state/FabAction'
 
 definePageMeta({ middleware: 'auth' })
 
-const { addToast, toggleDialog, hideDialog, refreshClass } = useGeneralStore()
-const { token } = useAuthStore()
+const { addToast, hideDialog, refreshClass } = useGeneralStore()
+const { user, token } = useAuthStore()
 const { selectedClass, showDialog } = toRefs(useGeneralStore())
 const api = useApi()
 const route = useRoute()
@@ -112,12 +96,22 @@ const route = useRoute()
 useHead({
 	title: `Rekap Presensi - ${selectedClass.value?.judul}`,
 })
+const idKelas = route.params.id.toString()
+
+interface RekapPresensi {
+	idPertemuan: string
+	data: Presensi | null
+}
 
 interface State {
-	items: Presensi[]
+	items: RekapPresensi[]
+	filled: number
+	validated: number
 }
 const state = reactive<State>({
 	items: [],
+	filled: 0,
+	validated: 0,
 })
 
 const crumbs = computed<BreadcrumbData[]>(() => [
@@ -127,33 +121,35 @@ const crumbs = computed<BreadcrumbData[]>(() => [
 	},
 	{
 		name: selectedClass.value?.judul ?? 'Detail Kelas',
-		url: `/k/${route.params.id}`,
+		url: `/k/${idKelas}`,
 	},
 	{
 		name: 'Rekap Presensi',
 	},
 ])
 
-const fabActions: FabAction[] = [
-	{
-		name: 'Buat Pengumuman',
-		icon: 'tabler:speakerphone',
-	},
-	{
-		name: 'Buat Pertemuan',
-		icon: 'tabler:calendar-event',
-	},
-]
-
 onMounted(async () => {
 	onRefreshClass()
+	onRefreshPertemuan()
 })
 
-const onFabClicked = (name: string) => {
-	if (name == 'Buat Pengumuman') {
-		toggleDialog('create-pengumuman')
+const onRefreshPertemuan = async () => {
+	const response = await api.pertemuan.fetchPertemuanByKelas(
+		token,
+		route.params.id.toString()
+	)
+
+	if (response.status >= 200 && response.status <= 299) {
+		state.items = response.data.map((a) => ({
+			idPertemuan: a.id,
+			data: a.presensi[0],
+		}))
 	} else {
-		toggleDialog('create-pertemuan')
+		addToast({
+			id: nanoid(),
+			type: 'error',
+			message: response.message,
+		})
 	}
 }
 

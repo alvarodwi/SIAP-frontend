@@ -1,6 +1,7 @@
 import { User } from '~/models/User'
+import { UserKelas } from '~/models/UserKelas'
 import HttpFactory from '~/repository/factory'
-import { ApiResponse, PaginationData } from '~/repository/types'
+import { ApiResponse, PaginationData, StatusData } from '~/repository/types'
 
 class UserModule extends HttpFactory {
 	async fetchUsers(
@@ -23,6 +24,34 @@ class UserModule extends HttpFactory {
 				Authorization: `Bearer ${token}`,
 			},
 		})
+	}
+
+	async fetchUsersByKelas(
+		token: string,
+		idKelas: string
+	): Promise<ApiResponse<PaginationData<UserKelas>>> {
+		return await this.call('GET', `/kelas/${idKelas}/praktikan`, undefined, {
+			headers: {
+				Authorization: `Bearer ${token}`,
+			},
+		})
+	}
+
+	async deleteUserFromKelasById(
+		token: string,
+		idKelas: string,
+		idUser: string
+	): Promise<ApiResponse<StatusData>> {
+		return await this.call(
+			'DELETE',
+			`/kelas/${idKelas}/praktikan/${idUser}/delete`,
+			undefined,
+			{
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			}
+		)
 	}
 }
 

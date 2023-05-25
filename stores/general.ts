@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { Kelas } from '~/models/Kelas'
 import { Pertemuan } from '~/models/Pertemuan'
-import { ToastData } from '~/models/ToastData'
+import { ToastData } from '~/models/state/ToastData'
 import { DialogType } from '~/models/state/DialogType'
 
 export type GeneralState = {

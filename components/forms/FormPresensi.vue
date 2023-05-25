@@ -1,15 +1,7 @@
 <template>
 	<div class="pb-4 mt-6 flex flex-col w-[25%] mx-auto h-auto">
-		<video
-			v-show="!state.isNewPhoto"
-			ref="video"
-			class="rounded-lg aspect-square"
-		/>
-		<canvas
-			v-show="state.isNewPhoto"
-			ref="canvas"
-			class="rounded-lg aspect-square"
-		/>
+		<video v-show="!state.isNewPhoto" ref="video" class="rounded-lg" />
+		<canvas v-show="state.isNewPhoto" ref="canvas" class="rounded-lg" />
 
 		<button
 			v-if="!state.isTakingPhoto"

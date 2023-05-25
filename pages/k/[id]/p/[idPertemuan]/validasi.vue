@@ -41,20 +41,15 @@
 					<span class="mt-2 text-title-sm">
 						Foto diambil pada
 						{{
-							format(
-								state.currentPresensi?.date
-									? parseISO(state.currentPresensi.date)
-									: new Date(),
-								'eeee, dd MMMM yyyy',
-								{
-									locale: id,
-								}
+							formatISODateString(
+								state.currentPresensi?.date ?? null,
+								'eeee, dd MMMM yyyy'
 							)
 						}}
 					</span>
 					<div
 						v-if="!state.currentPresensi?.isValidate"
-						class="flex flex-col items-center px-2 py-3 mt-2"
+						class="flex flex-col items-center px-2 py-3 mt-4"
 					>
 						<button
 							class="px-6 py-2 font-bold rounded-lg w-fit interactive-bg-primary"

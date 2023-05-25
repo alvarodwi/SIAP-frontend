@@ -15,7 +15,7 @@
 		</div>
 		<hr class="h-[2px] w-[60%] mx-auto bg-outline my-6" />
 		<FormInputText
-			v-model:input="formData.indexPertemuan"
+			v-model:input="index"
 			label="Pertemuan ke-"
 			type="text"
 			disabled
@@ -28,12 +28,33 @@
 		/>
 		<div class="flex flex-col mt-6">
 			<span data-id="label" class="text-title-md"> Upload Bukti </span>
-			<button
-				class="flex flex-row items-center gap-2 px-3 py-2 mt-4 border rounded-lg interactive-bg-surface border-outline w-fit"
-			>
-				<Icon name="tabler:plus" />
-				<span>Tambah File</span>
-			</button>
+			<div class="flex flex-row items-end">
+				<button
+					class="flex flex-row items-center gap-2 px-3 py-2 mt-4 border rounded-lg interactive-bg-surface border-outline w-fit"
+					@click="fileInput?.click()"
+				>
+					<Icon name="tabler:plus" />
+					<span>Tambah File</span>
+				</button>
+				<div
+					v-if="formData.bukti"
+					class="flex flex-row items-center gap-2 px-2 py-1 mt-2 rounded-lg cursor-pointer interactive-bg-surface-variant w-fit h-fit ml-4"
+				>
+					<span>{{ formData.bukti.name }}</span>
+					<icon
+						name="tabler:x"
+						class="text-error hover:bg-surface-variant-hover"
+						@click="formData.bukti = null"
+					/>
+				</div>
+			</div>
+			<input
+				ref="fileInput"
+				type="file"
+				class="hidden"
+				accept="image/jpeg, image/png"
+				@change="handleFileUpload"
+			/>
 			<span class="mt-2 text-body-md">
 				Bukti bisa berupa foto surat dokter atau surat dari orangtua
 			</span>
@@ -54,15 +75,16 @@ import { DropdownItem } from '~/models/state/DropdownItem'
 
 interface Props {
 	index: number
+	idPertemuan: string
 	namaKelas: string
 }
 const props = defineProps<Props>()
-const { index, namaKelas } = toRefs(props)
+const { index, idPertemuan, namaKelas } = toRefs(props)
 
 const formData: BuatIzin = reactive({
-	indexPertemuan: index,
+	idPertemuan: idPertemuan,
 	alasan: '',
-	bukti: '',
+	bukti: null,
 })
 
 const alasan: DropdownItem[] = [
@@ -75,6 +97,22 @@ const alasan: DropdownItem[] = [
 		value: 'izin',
 	},
 ]
+
+const fileInput = ref<HTMLElement>()
+const handleFileUpload = (event: Event) => {
+	let fileList = (event.target as HTMLInputElement).files
+	let file = fileList ? fileList[0] : null
+
+	if (!file) {
+		return
+	}
+
+	if (file.size > 1024 * 1024) {
+		alert('File too big (> 1MB)')
+		return
+	}
+	formData.bukti = file
+}
 
 defineEmits(['submit', 'close'])
 </script>

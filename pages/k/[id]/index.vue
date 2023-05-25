@@ -1,7 +1,7 @@
 <template>
 	<PopUpFab
 		v-if="selectedClass?.owned"
-		class="fixed"
+		class="fixed z-10"
 		:actions="fabActions"
 		@action-click="(s : string) => onFabClicked(s)"
 	/>
@@ -25,11 +25,14 @@
 						Kode Kelas : {{ state.currentClass?.kode }}
 					</span>
 				</div>
-				<div class="flex flex-row justify-end grow ml-9">
-					<NuxtLink :to="`${$route.params.id}/rekap`">
+				<div class="flex flex-row justify-end grow ml-9 gap-4">
+					<NuxtLink
+						v-if="!selectedClass?.owned"
+						:to="`${$route.params.id}/rekap`"
+					>
 						<button
 							type="button"
-							class="px-4 py-3 mr-4 font-bold border rounded-lg interactive-bg-surface border-primary text-title-sm"
+							class="px-4 py-3 font-bold border rounded-lg interactive-bg-surface border-primary text-title-sm"
 						>
 							Lihat Rekap Presensi
 						</button>
@@ -133,8 +136,9 @@
 			/>
 			<DialogFormIzin
 				v-if="showDialog == 'form-izin'"
-				:index="state.selectedPertemuanIndex"
+				:index="state.selectedPertemuan?.indexPert"
 				:nama-kelas="selectedClass?.judul ?? 'ini'"
+				:id-pertemuan="state.selectedPertemuan?.id"
 				@submit="onSubmitFormIzin"
 				@close="hideDialog()"
 			/>
@@ -153,6 +157,7 @@ import { IkutKelas } from '~/models/forms/IkutKelas'
 import { BreadcrumbData } from '~/models/state/BreadcrumbData'
 import { FabAction } from '~/models/state/FabAction'
 import { PertemuanByKelasData } from '~/repository/modules/pertemuan/types'
+import { Pertemuan } from '~/models/Pertemuan'
 
 definePageMeta({ middleware: 'auth' })
 
@@ -169,14 +174,14 @@ useHead({
 interface State {
 	filter: 'pertemuan' | 'pengumuman'
 	currentClass: Kelas | null
-	selectedPertemuanIndex: number
+	selectedPertemuan: Pertemuan | null
 	listPertemuan: PertemuanByKelasData[]
 	listPengumuman: Broadcast[]
 }
 const state = reactive<State>({
 	filter: 'pertemuan',
 	currentClass: null,
-	selectedPertemuanIndex: 0,
+	selectedPertemuan: null,
 	listPertemuan: [],
 	listPengumuman: [],
 })
@@ -296,8 +301,8 @@ const onFabClicked = (name: string) => {
 	}
 }
 
-const onFormIzinClick = (index: number) => {
-	state.selectedPertemuanIndex = index
+const onFormIzinClick = (data: Pertemuan) => {
+	state.selectedPertemuan = data
 	toggleDialog('form-izin')
 }
 
@@ -406,8 +411,35 @@ const onSubmitCreatePertemuan = async (data: BuatPertemuan) => {
 	}
 }
 
-const onSubmitFormIzin = (data: BuatIzin) => {
+const onSubmitFormIzin = async (data: BuatIzin) => {
 	hideDialog()
 	console.log(data)
+
+	if (!data.bukti) {
+		return
+	}
+
+	const response = await api.perizinan.submitPerizinan(
+		token,
+		idKelas,
+		data.idPertemuan,
+		data.alasan,
+		data.bukti
+	)
+
+	if (response.status >= 200 && response.status <= 299) {
+		onRefreshPertemuan()
+		addToast({
+			id: nanoid(),
+			type: 'success',
+			message: response.message,
+		})
+	} else {
+		addToast({
+			id: nanoid(),
+			type: 'error',
+			message: response.message,
+		})
+	}
 }
 </script>

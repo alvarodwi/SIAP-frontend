@@ -12,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import { ToastData } from '~/models/ToastData'
+import { ToastData } from '~/models/state/ToastData'
 
 interface Props {
 	data: ToastData

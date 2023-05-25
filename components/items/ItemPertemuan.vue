@@ -16,10 +16,10 @@
 				</span>
 			</div>
 			<button
-				v-if="!props.isAsisten && props.data?.presensi"
+				v-if="!props.isAsisten && !props.data?.presensi[0]"
 				class="px-4 font-bold border rounded-lg text-title-sm interactive-bg-surface border-primary"
 				type="button"
-				@click="$emit('formIzinClick', props.index)"
+				@click="$emit('formIzinClick', props.data)"
 			>
 				Isi Form Ketidakhadiran
 			</button>
