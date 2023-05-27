@@ -49,6 +49,9 @@
 import { ValidationError, object, string } from 'yup'
 
 definePageMeta({ layout: 'auth' })
+useHead({
+	title: `Login`,
+})
 
 const { onLogin } = useAuthStore()
 const { addToast } = useGeneralStore()

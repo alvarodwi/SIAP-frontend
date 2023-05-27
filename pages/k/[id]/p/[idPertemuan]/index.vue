@@ -126,7 +126,7 @@ const api = useApi()
 const route = useRoute()
 
 useHead({
-	title: `Detail Kelas`,
+	title: `Detail Pertemuan`,
 })
 
 interface State {
@@ -201,6 +201,7 @@ const onRefreshPresensi = async () => {
 			state.currentPresensi = response.data.presensi.data[0]
 		}
 	} else {
+		await navigateTo('/')
 		addToast({
 			id: nanoid(),
 			type: 'error',

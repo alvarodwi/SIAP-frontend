@@ -163,16 +163,15 @@ import { PertemuanByKelasData } from '~/repository/modules/pertemuan/types'
 import { Pertemuan } from '~/models/Pertemuan'
 
 definePageMeta({ middleware: 'auth' })
+useHead({
+	title: `Detail Kelas`,
+})
 
 const { addToast, toggleDialog, hideDialog, refreshClass } = useGeneralStore()
 const { token } = useAuthStore()
 const { selectedClass, showDialog } = toRefs(useGeneralStore())
 const api = useApi()
 const route = useRoute()
-
-useHead({
-	title: `Detail Kelas`,
-})
 
 interface State {
 	filter: 'pertemuan' | 'pengumuman'
@@ -222,8 +221,6 @@ const fabActions: FabAction[] = [
 onMounted(async () => {
 	onRefreshClass()
 	onRefreshCurrentClass()
-	onRefreshPertemuan()
-	onRefreshBroadcast()
 })
 
 const onRefreshPertemuan = async () => {
@@ -287,7 +284,10 @@ const onRefreshCurrentClass = async () => {
 			...response.data.kelas,
 			owned: response.data.isAsisten,
 		}
+		onRefreshPertemuan()
+		onRefreshBroadcast()
 	} else {
+		await navigateTo('/')
 		addToast({
 			id: nanoid(),
 			type: 'error',

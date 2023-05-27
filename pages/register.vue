@@ -73,6 +73,9 @@ import { object, string, ValidationError, ref as Yupref } from 'yup'
 import { DropdownItem } from '~/models/state/DropdownItem'
 
 definePageMeta({ layout: 'auth' })
+useHead({
+	title: `Register`,
+})
 
 interface Register {
 	email: string

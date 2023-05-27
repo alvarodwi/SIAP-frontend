@@ -159,7 +159,7 @@ const api = useApi()
 const route = useRoute()
 
 useHead({
-	title: `Detail Kelas`,
+	title: `Detail Kelas - Kelola Kelas`,
 })
 
 interface State {

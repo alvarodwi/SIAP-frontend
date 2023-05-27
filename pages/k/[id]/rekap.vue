@@ -81,6 +81,9 @@ import { IkutKelas } from '~/models/forms/IkutKelas'
 import { BreadcrumbData } from '~/models/state/BreadcrumbData'
 
 definePageMeta({ middleware: 'auth' })
+useHead({
+	title: `Detail Kelas - Rekap Presensi`,
+})
 
 const { addToast, hideDialog, refreshClass } = useGeneralStore()
 const { user, token } = useAuthStore()
