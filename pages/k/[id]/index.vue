@@ -84,7 +84,6 @@
 				v-for="(pertemuan, i) in state.listPertemuan"
 				:key="i"
 				:data="pertemuan"
-				:index="i + 1"
 				:is-asisten="selectedClass?.owned"
 				@form-izin-click="onFormIzinClick"
 			>
@@ -99,7 +98,7 @@
 		<div v-if="state.filter == 'pengumuman'" class="flex flex-col mt-5">
 			<ItemPengumuman
 				v-for="(pengumuman, i) in state.listPengumuman"
-				:key="i"
+				:key="pengumuman.id"
 				:data="pengumuman"
 			>
 				<hr
@@ -123,7 +122,11 @@
 			/>
 			<DialogCreatePertemuan
 				v-if="showDialog == 'create-pertemuan'"
-				:index="state.listPertemuan.length + 1"
+				:index="
+					state.listPertemuan.length > 0
+						? state.listPertemuan.slice(-1)[0].indexPert + 1
+						: 1
+				"
 				:nama-kelas="selectedClass?.judul ?? 'ini'"
 				@submit="onSubmitCreatePertemuan"
 				@close="hideDialog()"

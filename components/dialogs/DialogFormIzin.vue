@@ -58,11 +58,14 @@
 			<span class="mt-2 text-body-md">
 				Bukti bisa berupa foto surat dokter atau surat dari orangtua
 			</span>
+			<span v-if="errors.bukti" class="text-error text-body-md mt-2">
+				{{ errors.bukti }}
+			</span>
 		</div>
 		<button
 			type="submit"
 			class="px-16 py-3 mx-auto mt-9 font-bold rounded-lg interactive-bg-primary min-w-[40%]"
-			@click="$emit('submit', formData)"
+			@click="validate"
 		>
 			Kirim Form
 		</button>
@@ -70,8 +73,11 @@
 </template>
 
 <script setup lang="ts">
+import { ValidationError, mixed, object, string } from 'yup'
 import { BuatIzin } from '~/models/forms/BuatIzin'
 import { DropdownItem } from '~/models/state/DropdownItem'
+
+const emit = defineEmits(['submit', 'close'])
 
 interface Props {
 	index: number
@@ -87,14 +93,41 @@ const formData: BuatIzin = reactive({
 	bukti: null,
 })
 
+interface FormError {
+	alasan?: string
+	bukti?: string
+}
+
+const schema = object({
+	alasan: string().required(),
+	bukti: mixed().required(),
+})
+const errors = reactive<FormError>({})
+
+const validate = async () => {
+	schema
+		.validate(formData, { abortEarly: false })
+		.then((value) => {
+			emit('submit', value)
+		})
+		.catch((err: ValidationError) => {
+			Object.keys(errors).forEach(
+				(i) => (errors[i as keyof typeof errors] = undefined)
+			)
+			err.inner.forEach((error) => {
+				errors[error.path as keyof typeof errors] = error.message
+			})
+		})
+}
+
 const alasan: DropdownItem[] = [
 	{
 		name: 'Sakit',
-		value: 'sakit',
+		value: 'Sakit',
 	},
 	{
 		name: 'Izin',
-		value: 'izin',
+		value: 'Izin',
 	},
 ]
 
@@ -113,6 +146,4 @@ const handleFileUpload = (event: Event) => {
 	}
 	formData.bukti = file
 }
-
-defineEmits(['submit', 'close'])
 </script>

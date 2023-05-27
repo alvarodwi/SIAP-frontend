@@ -19,6 +19,7 @@
 			label="Nama Kelas"
 			type="text"
 			placeholder="Tulis judul kelas disini"
+			:error="errors && errors.judul ? errors.judul : ''"
 		/>
 		<FormInputTextarea
 			v-model:input="formData.deskripsi"
@@ -27,6 +28,7 @@
 			class="mt-6"
 			:rows="5"
 			placeholder="Tulis deskripsi kelas disini"
+			:error="errors && errors.deskripsi ? errors.deskripsi : ''"
 		/>
 		<div class="flex flex-col mt-6">
 			<span data-id="label" class="text-title-md">Pengampu Lainnya</span>
@@ -96,7 +98,7 @@
 		<button
 			type="submit"
 			class="px-16 py-3 mx-auto mt-9 font-bold rounded-lg interactive-bg-primary min-w-[40%]"
-			@click="$emit('submit', formData)"
+			@click="validate"
 		>
 			Buat Kelas
 		</button>
@@ -104,6 +106,7 @@
 </template>
 
 <script setup lang="ts">
+import { ValidationError, object, string } from 'yup'
 import {
 	Combobox,
 	ComboboxInput,
@@ -115,14 +118,43 @@ import {
 import { BuatKelas } from '~/models/forms/BuatKelas'
 import { DropdownItem } from '~/models/state/DropdownItem'
 
+const emit = defineEmits(['submit', 'close'])
+
 const formData: BuatKelas = reactive({
 	judul: '',
 	deskripsi: '',
 	listAsistenId: [],
 })
 
+interface FormError {
+	judul?: string
+	deskripsi?: string
+}
+
+const schema = object({
+	judul: string().required(),
+	deskripsi: string().required(),
+})
+const errors = reactive<FormError>({})
+
+const validate = async () => {
+	schema
+		.validate(formData, { abortEarly: false })
+		.then((value) => {
+			emit('submit', value)
+		})
+		.catch((err: ValidationError) => {
+			Object.keys(errors).forEach(
+				(i) => (errors[i as keyof typeof errors] = undefined)
+			)
+			err.inner.forEach((error) => {
+				errors[error.path as keyof typeof errors] = error.message
+			})
+		})
+}
+
 const api = useApi()
-const { token } = useAuthStore()
+const { token, user } = useAuthStore()
 
 const queryAsprak = ref('')
 const selectedOptions = ref<DropdownItem[]>([])
@@ -154,10 +186,12 @@ const onSearchAsisten = async () => {
 	const response = await api.asisten.fetchAsisten(token, '', 0, 100)
 
 	if (response.status >= 200 && response.status <= 299) {
-		listAsisten = response.data.data.map((a) => ({
-			name: a.user?.name ?? '',
-			value: a.id,
-		}))
+		listAsisten = response.data.data
+			.filter((item) => item.user?.id != user?.id)
+			.map((a) => ({
+				name: a.user?.name ?? '',
+				value: a.id,
+			}))
 		options.value = listAsisten.slice(0, 5)
 	}
 }
@@ -165,6 +199,4 @@ const onSearchAsisten = async () => {
 const removeSelectedOption = (index: number) => {
 	selectedOptions.value.splice(index, 1)
 }
-
-defineEmits(['submit', 'close'])
 </script>

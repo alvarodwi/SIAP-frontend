@@ -3,7 +3,7 @@
 		<div class="flex flex-row mt-4">
 			<div class="flex flex-col align-middle grow">
 				<span class="font-bold text-headline-sm">
-					Pertemuan {{ props.index }} : {{ props.data.judul }}
+					Pertemuan {{ props.data.indexPert }} : {{ props.data.judul }}
 				</span>
 				<span class="text-title-md">
 					{{
@@ -38,7 +38,7 @@
 				</div>
 				<NuxtLink class="flex flex-row grow items-center">
 					<span class="ml-3 text-title-sm grow">
-						Presensi Pertemuan {{ props.index }}
+						Presensi Pertemuan {{ props.data.indexPert }}
 					</span>
 					<div
 						v-if="!props.isAsisten"
@@ -63,7 +63,6 @@ import { Presensi } from '~/models/Presensi'
 import { PertemuanByKelasData } from '~/repository/modules/pertemuan/types'
 
 interface Props {
-	index: number
 	data: PertemuanByKelasData
 	isAsisten: boolean
 }

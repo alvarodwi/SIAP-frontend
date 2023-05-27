@@ -26,16 +26,18 @@
 			type="text"
 			class="mt-6"
 			placeholder="Tulis judul pertemuan disini"
+			:error="errors && errors.judul ? errors.judul : ''"
 		/>
 		<FormInputDate
 			v-model:date="formData.startDate"
 			label="Tanggal Pertemuan"
 			class="mt-6"
+			:error="errors && errors.startDate ? errors.startDate : ''"
 		/>
 		<button
 			type="submit"
 			class="px-16 py-3 mx-auto mt-9 font-bold rounded-lg interactive-bg-primary min-w-[40%]"
-			@click="$emit('submit', formData)"
+			@click="validate"
 		>
 			Buat Pertemuan
 		</button>
@@ -43,7 +45,10 @@
 </template>
 
 <script setup lang="ts">
+import { ValidationError, date, object, string } from 'yup'
 import { BuatPertemuan } from '~/models/forms/BuatPertemuan'
+
+const emit = defineEmits(['submit', 'close'])
 
 interface Props {
 	index: number
@@ -58,5 +63,32 @@ const formData: BuatPertemuan = reactive({
 	startDate: new Date(),
 })
 
-defineEmits(['submit', 'close'])
+interface FormError {
+	judul?: string
+	startDate?: string
+}
+
+const schema = object({
+	judul: string().required(),
+	startDate: date()
+		.min(new Date(), 'startDate must be later than today')
+		.required(),
+})
+const errors = reactive<FormError>({})
+
+const validate = async () => {
+	schema
+		.validate(formData, { abortEarly: false })
+		.then((value) => {
+			emit('submit', value)
+		})
+		.catch((err: ValidationError) => {
+			Object.keys(errors).forEach(
+				(i) => (errors[i as keyof typeof errors] = undefined)
+			)
+			err.inner.forEach((error) => {
+				errors[error.path as keyof typeof errors] = error.message
+			})
+		})
+}
 </script>

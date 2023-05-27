@@ -39,7 +39,7 @@ class BroadcastModule extends HttpFactory {
 	): Promise<ApiResponse<StatusData>> {
 		return await this.call(
 			'DELETE',
-			`/kelas/${idKelas}/broadcast/${idPengumuman}`,
+			`/kelas/${idKelas}/broadcast/${idPengumuman}/delete`,
 			undefined,
 			{
 				headers: {

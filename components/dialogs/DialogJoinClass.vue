@@ -17,11 +17,12 @@
 			label="Kode Kelas"
 			type="text"
 			placeholder="Tulis kode kelas disini"
+			:error="errors && errors.kode ? errors.kode : ''"
 		/>
 		<button
 			type="submit"
 			class="px-16 py-3 mx-auto mt-9 font-bold rounded-lg interactive-bg-primary min-w-[40%]"
-			@click="$emit('submit', formData)"
+			@click="validate"
 		>
 			Ikut Kelas
 		</button>
@@ -29,11 +30,39 @@
 </template>
 
 <script setup lang="ts">
+import { ValidationError, object, string } from 'yup'
 import { IkutKelas } from '~/models/forms/IkutKelas'
+
+const emit = defineEmits(['submit', 'close'])
 
 const formData: IkutKelas = reactive({
 	kode: '',
 })
 
-defineEmits(['submit', 'close'])
+interface FormError {
+	kode?: string
+}
+
+const schema = object({
+	kode: string()
+		.matches(/^(?=.*[a-z])([A-Za-z0-9]{6})$/, 'kode is invalid')
+		.required(),
+})
+const errors = reactive<FormError>({})
+
+const validate = async () => {
+	schema
+		.validate(formData, { abortEarly: false })
+		.then((value) => {
+			emit('submit', value)
+		})
+		.catch((err: ValidationError) => {
+			Object.keys(errors).forEach(
+				(i) => (errors[i as keyof typeof errors] = undefined)
+			)
+			err.inner.forEach((error) => {
+				errors[error.path as keyof typeof errors] = error.message
+			})
+		})
+}
 </script>

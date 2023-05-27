@@ -7,7 +7,7 @@
 			:model-value="props.modelValue"
 			@update:model-value="(value : string) => $emit('update:modelValue', value)"
 		>
-			<div class="mt-1">
+			<div>
 				<ListboxButton
 					class="mt-2 w-full bg-surface-variant rounded-lg py-2 px-1 text-body-md focus:outline-none min-w-[440px] border-r-[16px] border-transparent items-center justify-start flex flex-row"
 				>

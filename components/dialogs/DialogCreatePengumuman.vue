@@ -19,6 +19,7 @@
 			v-model:input="formData.judul"
 			label="Judul Pengumuman"
 			type="text"
+			:error="errors && errors.judul ? errors.judul : ''"
 		/>
 		<FormInputTextarea
 			v-model:input="formData.deskripsi"
@@ -27,6 +28,7 @@
 			:rows="6"
 			class="mt-6"
 			placeholder="Tulis deskripsi pengumuman disini (bisa menggunakan markdown)"
+			:error="errors && errors.deskripsi ? errors.deskripsi : ''"
 		/>
 		<div class="flex flex-col mt-6">
 			<span data-id="label" class="text-title-md">
@@ -58,7 +60,7 @@
 		<button
 			type="submit"
 			class="px-16 py-3 mx-auto mt-9 font-bold rounded-lg interactive-bg-primary min-w-[40%]"
-			@click="$emit('submit', formData)"
+			@click="validate"
 		>
 			Buat Pengumuman
 		</button>
@@ -77,8 +79,11 @@
 </template>
 
 <script setup lang="ts">
+import { ValidationError, object, string } from 'yup'
 import { BuatAttachment } from '~/models/forms/BuatAttachment'
 import { BuatPengumuman } from '~/models/forms/BuatPengumuman'
+
+const emit = defineEmits(['submit', 'close'])
 
 interface Props {
 	namaKelas: string
@@ -93,6 +98,33 @@ const formData: BuatPengumuman = reactive({
 	attachments: [],
 })
 
+interface FormError {
+	judul?: string
+	deskripsi?: string
+}
+
+const schema = object({
+	judul: string().required(),
+	deskripsi: string().required(),
+})
+const errors = reactive<FormError>({})
+
+const validate = async () => {
+	schema
+		.validate(formData, { abortEarly: false })
+		.then((value) => {
+			emit('submit', value)
+		})
+		.catch((err: ValidationError) => {
+			Object.keys(errors).forEach(
+				(i) => (errors[i as keyof typeof errors] = undefined)
+			)
+			err.inner.forEach((error) => {
+				errors[error.path as keyof typeof errors] = error.message
+			})
+		})
+}
+
 const addAttachment = (data: BuatAttachment) => {
 	formData.attachments.push(data)
 }
@@ -100,8 +132,6 @@ const addAttachment = (data: BuatAttachment) => {
 const removeAttachment = (index: number) => {
 	formData.attachments.splice(index, 1)
 }
-
-defineEmits(['submit', 'close'])
 
 interface State {
 	isNestedDialogOpen: boolean

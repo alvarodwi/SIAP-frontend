@@ -16,7 +16,7 @@
 		</div>
 		<div class="mb-4" v-html="compiledMarkdown"></div>
 		<div v-if="props.data.attachment.length > 0">
-			<a
+			<NuxtLink
 				v-for="link in props.data.attachment"
 				:key="link.id"
 				:to="link.url"
@@ -35,7 +35,7 @@
 					</div>
 					<span class="ml-3 text-title-sm grow">{{ link.judul }}</span>
 				</div>
-			</a>
+			</NuxtLink>
 		</div>
 		<slot />
 	</div>

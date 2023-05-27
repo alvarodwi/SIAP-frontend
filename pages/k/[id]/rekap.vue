@@ -1,9 +1,4 @@
 <template>
-	<PopUpFab
-		class="fixed"
-		:actions="fabActions"
-		@action-click="(s : string) => onFabClicked(s)"
-	/>
 	<div class="p-6 overflow-x-hidden overflow-y-auto">
 		<Breadcrumb :crumbs="crumbs" />
 		<!-- header -->

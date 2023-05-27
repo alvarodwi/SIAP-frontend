@@ -11,7 +11,7 @@
 			:placeholder="placeholder"
 			:disabled="disabled"
 		/>
-		<span v-if="error" class="text-error text-body-md mt-2">
+		<span class="text-error text-body-md mt-2">
 			{{ error }}
 		</span>
 	</div>
