@@ -1,9 +1,4 @@
 <template>
-	<PopUpFab
-		class="fixed"
-		:actions="fabActions"
-		@action-click="(s : string) => onFabClicked(s)"
-	/>
 	<div class="p-6 overflow-x-hidden overflow-y-auto">
 		<Breadcrumb :crumbs="crumbs" />
 		<!-- header -->
@@ -86,6 +81,9 @@ import { IkutKelas } from '~/models/forms/IkutKelas'
 import { BreadcrumbData } from '~/models/state/BreadcrumbData'
 
 definePageMeta({ middleware: 'auth' })
+useHead({
+	title: `Detail Kelas - Rekap Presensi`,
+})
 
 const { addToast, hideDialog, refreshClass } = useGeneralStore()
 const { user, token } = useAuthStore()

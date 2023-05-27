@@ -12,17 +12,17 @@
 			id="form"
 			class="flex flex-col w-60% bg-surface rounded-2xl px-9 py-6 justify-center"
 		>
-			<div class="my-4">
+			<div class="mt-4">
 				<FormInputText
-					v-model:input="email"
+					v-model:input="formData.email"
 					label="Email"
 					type="email"
 					:error="errors && errors.email ? errors.email : ''"
 				/>
 			</div>
-			<div class="my-4">
+			<div class="mt-4">
 				<FormInputText
-					v-model:input="password"
+					v-model:input="formData.password"
 					label="Kata Sandi"
 					type="password"
 					:error="errors && errors.password ? errors.password : ''"
@@ -31,7 +31,7 @@
 			<button
 				type="submit"
 				class="w-full py-4 font-bold rounded-lg bg-primary text-on-primary text-title-md mt-9"
-				@click="login"
+				@click="validate"
 			>
 				Masuk
 			</button>
@@ -46,26 +46,55 @@
 </template>
 
 <script setup lang="ts">
+import { ValidationError, object, string } from 'yup'
+
 definePageMeta({ layout: 'auth' })
+useHead({
+	title: `Login`,
+})
+
+const { onLogin } = useAuthStore()
+const { addToast } = useGeneralStore()
+const api = useApi()
+
+interface Login {
+	email: string
+	password: string
+}
 
 interface LoginError {
 	email?: string
 	password?: string
 }
 
-let email = ref('')
-let password = ref('')
-let errors = ref<LoginError>({ email: undefined, password: undefined })
+const formData = reactive<Login>({
+	email: '',
+	password: '',
+})
 
-const { onLogin } = useAuthStore()
-const { addToast } = useGeneralStore()
-const api = useApi()
+const loginSchema = object({
+	email: string().email().required(),
+	password: string().min(8).required(),
+})
+const errors = reactive<LoginError>({})
 
-const login = async () => {
-	const data = {
-		email: email.value || '',
-		password: password.value || '',
-	}
+const validate = async () => {
+	loginSchema
+		.validate(formData, { abortEarly: false })
+		.then((value) => {
+			login(value)
+		})
+		.catch((err: ValidationError) => {
+			Object.keys(errors).forEach(
+				(i) => (errors[i as keyof typeof errors] = undefined)
+			)
+			err.inner.forEach((error) => {
+				errors[error.path as keyof typeof errors] = error.message
+			})
+		})
+}
+
+const login = async (data: Login) => {
 	const response = await api.auth.login(data)
 
 	console.log(response)

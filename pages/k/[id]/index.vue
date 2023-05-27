@@ -84,7 +84,6 @@
 				v-for="(pertemuan, i) in state.listPertemuan"
 				:key="i"
 				:data="pertemuan"
-				:index="i + 1"
 				:is-asisten="selectedClass?.owned"
 				@form-izin-click="onFormIzinClick"
 			>
@@ -99,7 +98,7 @@
 		<div v-if="state.filter == 'pengumuman'" class="flex flex-col mt-5">
 			<ItemPengumuman
 				v-for="(pengumuman, i) in state.listPengumuman"
-				:key="i"
+				:key="pengumuman.id"
 				:data="pengumuman"
 			>
 				<hr
@@ -123,7 +122,11 @@
 			/>
 			<DialogCreatePertemuan
 				v-if="showDialog == 'create-pertemuan'"
-				:index="state.listPertemuan.length + 1"
+				:index="
+					state.listPertemuan.length > 0
+						? state.listPertemuan.slice(-1)[0].indexPert + 1
+						: 1
+				"
 				:nama-kelas="selectedClass?.judul ?? 'ini'"
 				@submit="onSubmitCreatePertemuan"
 				@close="hideDialog()"
@@ -160,16 +163,15 @@ import { PertemuanByKelasData } from '~/repository/modules/pertemuan/types'
 import { Pertemuan } from '~/models/Pertemuan'
 
 definePageMeta({ middleware: 'auth' })
+useHead({
+	title: `Detail Kelas`,
+})
 
 const { addToast, toggleDialog, hideDialog, refreshClass } = useGeneralStore()
 const { token } = useAuthStore()
 const { selectedClass, showDialog } = toRefs(useGeneralStore())
 const api = useApi()
 const route = useRoute()
-
-useHead({
-	title: `Detail Kelas`,
-})
 
 interface State {
 	filter: 'pertemuan' | 'pengumuman'
@@ -219,8 +221,6 @@ const fabActions: FabAction[] = [
 onMounted(async () => {
 	onRefreshClass()
 	onRefreshCurrentClass()
-	onRefreshPertemuan()
-	onRefreshBroadcast()
 })
 
 const onRefreshPertemuan = async () => {
@@ -284,7 +284,10 @@ const onRefreshCurrentClass = async () => {
 			...response.data.kelas,
 			owned: response.data.isAsisten,
 		}
+		onRefreshPertemuan()
+		onRefreshBroadcast()
 	} else {
+		await navigateTo('/')
 		addToast({
 			id: nanoid(),
 			type: 'error',

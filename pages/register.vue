@@ -7,35 +7,35 @@
 		>
 			<div
 				id="form"
-				class="grid justify-center w-full grid-cols-2 gap-6 py-6 rounded-2xl px-9"
+				class="grid justify-center items-center w-full grid-cols-2 gap-6 py-6 rounded-2xl px-9"
 			>
 				<FormInputText
-					v-model:input="email"
+					v-model:input="formData.email"
 					label="Email"
 					type="email"
 					:error="errors && errors.email ? errors.email : ''"
 				/>
 
 				<FormInputText
-					v-model:input="namaLengkap"
+					v-model:input="formData.name"
 					label="Nama Lengkap"
 					type="text"
-					:error="errors && errors.namaLengkap ? errors.namaLengkap : ''"
+					:error="errors && errors.name ? errors.name : ''"
 				/>
 				<FormInputText
-					v-model:input="password"
+					v-model:input="formData.password"
 					label="Kata Sandi"
 					type="password"
 					:error="errors && errors.password ? errors.password : ''"
 				/>
 				<FormInputText
-					v-model:input="npm"
+					v-model:input="formData.npm"
 					label="NPM"
 					type="text"
 					:error="errors && errors.npm ? errors.npm : ''"
 				/>
 				<FormInputText
-					v-model:input="confirmPassword"
+					v-model:input="formData.confirmPassword"
 					label="Ulangi Kata Sandi"
 					type="password"
 					:error="
@@ -43,7 +43,7 @@
 					"
 				/>
 				<FormInputSelect
-					v-model="role"
+					v-model="formData.role"
 					label="Role"
 					:options="listRole"
 					:error="errors && errors.role ? errors.role : ''"
@@ -53,7 +53,7 @@
 				<button
 					type="submit"
 					class="w-full bg-primary text-on-primary text-title-md font-bold py-4 rounded-lg max-w-[440px] mx-auto"
-					@click="register"
+					@click="validate"
 				>
 					Daftar
 				</button>
@@ -69,26 +69,55 @@
 </template>
 
 <script setup lang="ts">
+import { object, string, ValidationError, ref as Yupref } from 'yup'
 import { DropdownItem } from '~/models/state/DropdownItem'
 
 definePageMeta({ layout: 'auth' })
+useHead({
+	title: `Register`,
+})
+
+interface Register {
+	email: string
+	name: string
+	npm: string
+	role: string
+	password: string
+	confirmPassword: string
+}
 
 interface RegisterError {
 	email?: string
-	password?: string
-	confirmPassword?: string
-	namaLengkap?: string
+	name?: string
 	npm?: string
 	role?: string
+	password?: string
+	confirmPassword?: string
 }
 
-let email = ref('')
-let password = ref('')
-let confirmPassword = ref('')
-let namaLengkap = ref('')
-let npm = ref('')
-let role = ref('')
-let errors = ref<RegisterError>({ email: undefined, password: undefined })
+const formData = reactive<Register>({
+	email: '',
+	name: '',
+	npm: '',
+	role: '',
+	password: '',
+	confirmPassword: '',
+})
+
+const registerSchema = object({
+	email: string().email().required(),
+	name: string().min(10).required(),
+	npm: string()
+		.min(12)
+		.matches(/^([0-9]+)$/, 'npm must be a number')
+		.required(),
+	role: string().required(),
+	password: string().min(8).required(),
+	confirmPassword: string()
+		.oneOf([Yupref('password'), undefined], 'password must match')
+		.required(),
+})
+const errors = reactive<RegisterError>({})
 
 const listRole: DropdownItem[] = [
 	{
@@ -104,17 +133,30 @@ const listRole: DropdownItem[] = [
 const api = useApi()
 const { addToast } = useGeneralStore()
 
-const register = async () => {
-	const data = {
-		email: email.value || '',
-		password: password.value || '',
-		confirmPassword: confirmPassword.value || '',
-		name: namaLengkap.value || '',
-		npm: npm.value || '',
+const validate = async () => {
+	registerSchema
+		.validate(formData, { abortEarly: false })
+		.then((value) => {
+			register(value)
+		})
+		.catch((err: ValidationError) => {
+			Object.keys(errors).forEach(
+				(i) => (errors[i as keyof typeof errors] = undefined)
+			)
+			console.log('Validation Error =>', err)
+			err.inner.forEach((error) => {
+				console.log('Error =>', error.path, '->', error.message)
+				errors[error.path as keyof typeof errors] = error.message
+			})
+		})
+}
+
+const register = async (data: Register) => {
+	const response = await api.auth.register({
+		...data,
 		noTelp: '',
-		isAsisten: role.value == 'asisten' ? true : false,
-	}
-	const response = await api.auth.register(data)
+		isAsisten: data.role == 'asisten' ? true : false,
+	})
 
 	console.log(response)
 

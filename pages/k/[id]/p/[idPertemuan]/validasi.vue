@@ -111,7 +111,7 @@ const api = useApi()
 const route = useRoute()
 
 useHead({
-	title: `Detail Kelas`,
+	title: `Validasi Presensi`,
 })
 
 interface State {
