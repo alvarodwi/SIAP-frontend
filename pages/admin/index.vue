@@ -28,6 +28,9 @@ interface ValidationTable {
 }
 
 definePageMeta({ middleware: 'admin', layout: 'admin' })
+useHead({
+	title: `Admin Page`,
+})
 
 const api = useApi()
 const { addToast } = useGeneralStore()

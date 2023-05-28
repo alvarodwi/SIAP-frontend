@@ -365,7 +365,7 @@ const onSubmitCreatePengumuman = async (data: BuatPengumuman) => {
 	const response = await api.broadcast.createBroadcast(token, idKelas, {
 		judul: data.judul,
 		deskripsi: data.deskripsi,
-		date: formatDateString(data.date, 'dd/MM/yyyy hh:mm:ss'),
+		date: formatDateString(data.date, "yyyy-MM-dd'T'HH:mm:ssXX"),
 		attachments: data.attachments,
 	})
 
@@ -394,7 +394,7 @@ const onSubmitCreatePertemuan = async (data: BuatPertemuan) => {
 		judul: data.judul,
 		startDate: formatDateString(
 			data.startDate ? data.startDate : new Date(),
-			'dd/MM/yyyy hh:mm:ss'
+			"yyyy-MM-dd'T'HH:mm:ssXX"
 		),
 	})
 

@@ -39,6 +39,9 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: 'auth' })
+useHead({
+	title: `Login Admin`,
+})
 
 interface LoginError {
 	email?: string
